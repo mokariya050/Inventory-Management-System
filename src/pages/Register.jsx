@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../services/api'
 import { useAuth } from '../context/AuthContext'
@@ -15,6 +15,13 @@ export default function Register() {
   const [loading, setLoading] = useState(false)
   const [showPwd, setShowPwd]           = useState(false)
   const [showPwdRepeat, setShowPwdRepeat] = useState(false)
+  const [resendTimer, setResendTimer] = useState(0)
+
+  useEffect(() => {
+    if (resendTimer <= 0) return
+    const id = setTimeout(() => setResendTimer((t) => t - 1), 1000)
+    return () => clearTimeout(id)
+  }, [resendTimer])
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
@@ -38,6 +45,7 @@ export default function Register() {
     try {
       await api.sendOtp({ email: form.email, purpose: 'register' })
       setInfo(`A 6-digit code was sent to ${form.email}`)
+      setResendTimer(60)
       setStep(2)
     } catch (err) {
       setError(err.message)
@@ -72,6 +80,7 @@ export default function Register() {
     try {
       await api.sendOtp({ email: form.email, purpose: 'register' })
       setInfo(`Code resent to ${form.email}`)
+      setResendTimer(60)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -231,14 +240,14 @@ export default function Register() {
                       {loading ? 'Verifying…' : 'Verify & Create Account'}
                     </button>
                     <div className="text-center mt-3 small">
-                      <button type="button" className="btn btn-link p-0 small" onClick={handleResend} disabled={loading}>
-                        Resend OTP
+                      <button type="button" className="btn btn-link p-0 small" onClick={handleResend} disabled={loading || resendTimer > 0}>
+                        {resendTimer > 0 ? `Resend OTP (${resendTimer}s)` : 'Resend OTP'}
                       </button>
                       {' · '}
                       <button
                         type="button"
                         className="btn btn-link p-0 small"
-                        onClick={() => { setStep(1); setOtp(''); setError(''); setInfo('') }}
+                        onClick={() => { setStep(1); setOtp(''); setError(''); setInfo(''); setResendTimer(0) }}
                       >
                         Back
                       </button>

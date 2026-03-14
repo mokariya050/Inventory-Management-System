@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../services/api'
 
@@ -12,6 +12,13 @@ export default function RecoverPassword() {
   const [loading, setLoading] = useState(false)
   const [showNewPwd, setShowNewPwd]         = useState(false)
   const [showConfirmPwd, setShowConfirmPwd] = useState(false)
+  const [resendTimer, setResendTimer] = useState(0)
+
+  useEffect(() => {
+    if (resendTimer <= 0) return
+    const id = setTimeout(() => setResendTimer((t) => t - 1), 1000)
+    return () => clearTimeout(id)
+  }, [resendTimer])
 
   // Step 1 — send OTP
   const handleSendOtp = async (e) => {
@@ -22,6 +29,7 @@ export default function RecoverPassword() {
     try {
       const data = await api.sendOtp({ email, purpose: 'reset' })
       setInfo(data.message)
+      setResendTimer(60)
       setStep(2)
     } catch (err) {
       setError(err.message)
@@ -36,6 +44,7 @@ export default function RecoverPassword() {
     try {
       const data = await api.sendOtp({ email, purpose: 'reset' })
       setInfo(data.message)
+      setResendTimer(60)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -163,14 +172,14 @@ export default function RecoverPassword() {
           {loading ? 'Resetting…' : 'Reset Password'}
         </button>
         <div className="text-center mt-3 small">
-          <button type="button" className="btn btn-link p-0 small" onClick={handleResend} disabled={loading}>
-            Resend OTP
+          <button type="button" className="btn btn-link p-0 small" onClick={handleResend} disabled={loading || resendTimer > 0}>
+            {resendTimer > 0 ? `Resend OTP (${resendTimer}s)` : 'Resend OTP'}
           </button>
           {' · '}
           <button
             type="button"
             className="btn btn-link p-0 small"
-            onClick={() => { setStep(1); setOtp(''); setError(''); setInfo('') }}
+            onClick={() => { setStep(1); setOtp(''); setError(''); setInfo(''); setResendTimer(0) }}
           >
             Back
           </button>
