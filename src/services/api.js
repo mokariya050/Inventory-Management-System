@@ -83,8 +83,9 @@ export const api = {
 
   // ── User ─────────────────────────────────────────────────────────
   getMe:         ()     => request('/api/users/me'),
-  updateMe:      (body) => request('/api/users/me',         { method: 'PUT', body: JSON.stringify(body) }),
-  updateContact: (body) => request('/api/users/me/contact', { method: 'PUT', body: JSON.stringify(body) }),
+  updateMe:      (body) => request('/api/users/me',          { method: 'PUT', body: JSON.stringify(body) }),
+  updateContact: (body) => request('/api/users/me/contact',  { method: 'PUT', body: JSON.stringify(body) }),
+  changePassword:(body) => request('/api/users/me/password', { method: 'PUT', body: JSON.stringify(body) }),
 
   // ── Notifications & Messages ─────────────────────────────────────
   getNotifications: () => request('/api/notifications'),

@@ -5,16 +5,21 @@ import { useAuth } from '../context/AuthContext'
 export default function Profile() {
   const { updateUser } = useAuth()
   const [userForm, setUserForm] = useState({ username: '', email: '', name: '' })
-  const [contactForm, setContactForm] = useState({ address: '', city: '', country: '' })
+  const [contactForm, setContactForm] = useState({ address: '', city: '', country: '', phone: '' })
   const [userRole, setUserRole]     = useState(null)
   const [avatarUrl, setAvatarUrl]   = useState('/assets/img/dogs/image2.jpeg')
   const [userMsg, setUserMsg]       = useState('')
   const [contactMsg, setContactMsg] = useState('')
+  const [pwdForm, setPwdForm]       = useState({ current_password: '', new_password: '', confirm_password: '' })
+  const [pwdMsg, setPwdMsg]         = useState({ text: '', type: '' })
+  const [showCurrentPwd, setShowCurrentPwd] = useState(false)
+  const [showNewPwd, setShowNewPwd]         = useState(false)
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false)
 
   useEffect(() => {
     api.getMe().then((u) => {
       setUserForm({ username: u.username || '', email: u.email || '', name: u.name || '' })
-      setContactForm({ address: u.address || '', city: u.city || '', country: u.country || '' })
+      setContactForm({ address: u.address || '', city: u.city || '', country: u.country || '', phone: u.phone || '' })
       setUserRole(u.role || null)
       if (u.avatar_url) setAvatarUrl(u.avatar_url)
     }).catch(console.error)
@@ -43,6 +48,19 @@ export default function Profile() {
       setTimeout(() => setContactMsg(''), 3000)
     } catch (err) {
       setContactMsg(err.message)
+    }
+  }
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault()
+    setPwdMsg({ text: '', type: '' })
+    try {
+      const data = await api.changePassword(pwdForm)
+      setPwdForm({ current_password: '', new_password: '', confirm_password: '' })
+      setPwdMsg({ text: data.message, type: 'success' })
+      setTimeout(() => setPwdMsg({ text: '', type: '' }), 4000)
+    } catch (err) {
+      setPwdMsg({ text: err.message, type: 'danger' })
     }
   }
 
@@ -200,6 +218,20 @@ export default function Profile() {
                           />
                         </div>
                       </div>
+                      <div className="col">
+                        <div className="mb-3">
+                          <label className="form-label" htmlFor="phone"><strong>Phone Number</strong></label>
+                          <input
+                            className="form-control"
+                            type="tel"
+                            id="phone"
+                            placeholder="+1 555 000 0000"
+                            name="phone"
+                            value={contactForm.phone}
+                            onChange={handleContactChange}
+                          />
+                        </div>
+                      </div>
                     </div>
                     <div className="mb-3">
                       <button className="btn btn-primary btn-sm" type="submit">Save Settings</button>
@@ -211,7 +243,79 @@ export default function Profile() {
           </div>
         </div>
       </div>
-      <div className="card shadow mb-5"></div>
+              <div className="card shadow mb-3">
+                <div className="card-header py-3">
+                  <p className="text-primary m-0 fw-bold">Change Password</p>
+                </div>
+                <div className="card-body">
+                  {pwdMsg.text && <div className={`alert alert-${pwdMsg.type} py-1 small`}>{pwdMsg.text}</div>}
+                  <form onSubmit={handlePasswordSubmit}>
+                    <div className="mb-3">
+                      <label className="form-label"><strong>Current Password</strong></label>
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          className="form-control"
+                          type={showCurrentPwd ? 'text' : 'password'}
+                          placeholder="Enter current password"
+                          value={pwdForm.current_password}
+                          onChange={(e) => setPwdForm({ ...pwdForm, current_password: e.target.value })}
+                          style={{ paddingRight: 36 }}
+                          required
+                        />
+                        <button type="button" onClick={() => setShowCurrentPwd((v) => !v)} tabIndex={-1}
+                          style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', padding: 4, cursor: 'pointer', color: '#9ca3af', lineHeight: 1 }}>
+                          <i className={showCurrentPwd ? 'fas fa-eye-slash' : 'fas fa-eye'} style={{ fontSize: 14 }} />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col">
+                        <div className="mb-3">
+                          <label className="form-label"><strong>New Password</strong></label>
+                          <div style={{ position: 'relative' }}>
+                            <input
+                              className="form-control"
+                              type={showNewPwd ? 'text' : 'password'}
+                              placeholder="At least 6 characters"
+                              value={pwdForm.new_password}
+                              onChange={(e) => setPwdForm({ ...pwdForm, new_password: e.target.value })}
+                              style={{ paddingRight: 36 }}
+                              required
+                            />
+                            <button type="button" onClick={() => setShowNewPwd((v) => !v)} tabIndex={-1}
+                              style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', padding: 4, cursor: 'pointer', color: '#9ca3af', lineHeight: 1 }}>
+                              <i className={showNewPwd ? 'fas fa-eye-slash' : 'fas fa-eye'} style={{ fontSize: 14 }} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col">
+                        <div className="mb-3">
+                          <label className="form-label"><strong>Confirm New Password</strong></label>
+                          <div style={{ position: 'relative' }}>
+                            <input
+                              className="form-control"
+                              type={showConfirmPwd ? 'text' : 'password'}
+                              placeholder="Repeat new password"
+                              value={pwdForm.confirm_password}
+                              onChange={(e) => setPwdForm({ ...pwdForm, confirm_password: e.target.value })}
+                              style={{ paddingRight: 36 }}
+                              required
+                            />
+                            <button type="button" onClick={() => setShowConfirmPwd((v) => !v)} tabIndex={-1}
+                              style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', padding: 4, cursor: 'pointer', color: '#9ca3af', lineHeight: 1 }}>
+                              <i className={showConfirmPwd ? 'fas fa-eye-slash' : 'fas fa-eye'} style={{ fontSize: 14 }} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <button className="btn btn-primary btn-sm" type="submit">Change Password</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
     </>
   )
 }

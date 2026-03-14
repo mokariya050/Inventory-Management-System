@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
     address       VARCHAR(200),
     city          VARCHAR(80),
     country       VARCHAR(80),
+    phone         VARCHAR(30),
     avatar_url    VARCHAR(300) DEFAULT '/assets/img/avatars/avatar1.jpeg',
     created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -306,3 +307,11 @@ INSERT IGNORE INTO stock_levels (product_id, location_id, qty) VALUES
 (8,  1, 12),  -- Sticky Notes Pack    : 12 (LOW, min=30)
 (9,  1, 30),  -- Company T-Shirt (M)  : 30 (OK, min=25)
 (10, 3, 3);   -- Safety Vest          : 3  (LOW, min=10)
+
+-- ─────────────────────────────────────────────────────────────────
+-- Migrations (safe to re-run)
+-- ─────────────────────────────────────────────────────────────────
+
+-- Add phone column to existing databases
+ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(30) AFTER country;
+

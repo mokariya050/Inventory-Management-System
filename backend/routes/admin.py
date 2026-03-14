@@ -15,7 +15,7 @@ def list_users():
     try:
         with conn.cursor() as cur:
             cur.execute(
-                'SELECT id, username, email, name, role, created_at '
+                'SELECT id, username, email, name, role, phone, created_at '
                 'FROM users ORDER BY created_at DESC'
             )
             rows = cur.fetchall()
@@ -29,6 +29,7 @@ def list_users():
             'email':      r['email'],
             'name':       r['name'],
             'role':       r['role'],
+            'phone':      r['phone'],
             'created_at': r['created_at'].isoformat() if r['created_at'] else None,
         }
         for r in rows

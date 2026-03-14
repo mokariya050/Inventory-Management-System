@@ -100,7 +100,8 @@ export default function Users() {
     return (
       (u.name || '').toLowerCase().includes(q) ||
       (u.username || '').toLowerCase().includes(q) ||
-      (u.email || '').toLowerCase().includes(q)
+      (u.email || '').toLowerCase().includes(q) ||
+      (u.phone || '').toLowerCase().includes(q)
     )
   })
 
@@ -122,7 +123,7 @@ export default function Users() {
             <input
               className="form-control form-control-sm"
               style={{ width: 220 }}
-              placeholder="Search name, username, email…"
+              placeholder="Search name, username, email, phone…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -147,6 +148,7 @@ export default function Users() {
                     <th style={{ paddingLeft: 20 }}>Name</th>
                     <th>Username</th>
                     <th>Email</th>
+                    <th>Phone</th>
                     <th>Role</th>
                     <th>Joined</th>
                     <th></th>
@@ -170,6 +172,7 @@ export default function Users() {
                         </td>
                         <td className="text-muted">{u.username}</td>
                         <td className="text-muted small">{u.email}</td>
+                        <td className="text-muted small">{u.phone || '—'}</td>
                         <td>
                           {isSaving ? (
                             <span className="text-muted fst-italic small">
