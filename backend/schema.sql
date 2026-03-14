@@ -239,7 +239,7 @@ CREATE TABLE IF NOT EXISTS adjustment_lines (
 INSERT IGNORE INTO users (username, email, password_hash, name, role, address, city, country, avatar_url) VALUES
 ('admin', 'admin@brand.com',
  'scrypt:32768:8:1$thv4DPRWdbnWJGBw$5431048b496e1e06c2250990511082639c8a32bddc9038e9deb0230cf5d11f6285a52ccbe714abd7827760f1bfaef813406fa13f53bd5f82776b56bc701ec6f7',
- 'Valerie Luna', 'Administrator', 'Sunset Blvd, 38', 'Los Angeles', 'USA',
+ 'Valerie Luna', 'admin', 'Sunset Blvd, 38', 'Los Angeles', 'USA',
  '/assets/img/avatars/avatar1.jpeg');
 
 -- Notifications

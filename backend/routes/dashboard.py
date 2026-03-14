@@ -90,7 +90,7 @@ def stock_by_category():
                 LEFT JOIN product_categories pc ON pc.id = p.category_id
                 LEFT JOIN stock_levels sl ON sl.product_id = p.id
                 GROUP BY pc.id, pc.name
-                ORDER BY total_qty DESC
+                ORDER BY COALESCE(SUM(sl.qty), 0) DESC
             ''')
             rows = cur.fetchall()
     finally:
@@ -116,8 +116,8 @@ def low_stock():
                 LEFT JOIN product_categories pc ON pc.id = p.category_id
                 LEFT JOIN stock_levels sl ON sl.product_id = p.id
                 GROUP BY p.id, p.sku, p.name, p.min_stock, pc.name
-                HAVING total_qty < p.min_stock
-                ORDER BY (total_qty / GREATEST(p.min_stock, 1)) ASC
+                HAVING COALESCE(SUM(sl.qty), 0) < p.min_stock
+                ORDER BY (COALESCE(SUM(sl.qty), 0) / GREATEST(p.min_stock, 1)) ASC
             ''')
             rows = cur.fetchall()
     finally:

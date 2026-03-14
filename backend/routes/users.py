@@ -36,14 +36,13 @@ def update_me():
     username = data.get('username', '').strip()
     email    = data.get('email', '').strip()
     name     = data.get('name', '').strip()
-    role     = data.get('role', '').strip()
 
     conn = get_connection()
     try:
         with conn.cursor() as cur:
             cur.execute(
-                'UPDATE users SET username=%s, email=%s, name=%s, role=%s WHERE id=%s',
-                (username, email, name, role, user_id)
+                'UPDATE users SET username=%s, email=%s, name=%s WHERE id=%s',
+                (username, email, name, user_id)
             )
             cur.execute(
                 'SELECT id, username, email, name, role, address, city, country, avatar_url '

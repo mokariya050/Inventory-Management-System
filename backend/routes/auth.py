@@ -83,6 +83,7 @@ def login():
             'email':      user['email'],
             'username':   user['username'],
             'avatar_url': user['avatar_url'],
+            'role':       user['role'],
         },
     })
 
@@ -179,6 +180,7 @@ def register():
             'email':      user['email'],
             'username':   user['username'],
             'avatar_url': user['avatar_url'],
+            'role':       user['role'],
         },
     }), 201
 

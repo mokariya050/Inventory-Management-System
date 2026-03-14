@@ -3,7 +3,7 @@ export default function Footer() {
     <footer className="bg-white sticky-footer">
       <div className="container my-auto">
         <div className="text-center my-auto copyright">
-          <span>Copyright © Brand 2026</span>
+          <span>Copyright © CoreInventory 2026</span>
         </div>
       </div>
     </footer>

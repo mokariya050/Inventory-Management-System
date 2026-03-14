@@ -20,6 +20,7 @@ from routes.deliveries   import deliveries_bp
 from routes.transfers    import transfers_bp
 from routes.adjustments  import adjustments_bp
 from routes.stock        import stock_bp
+from routes.admin        import admin_bp
 
 
 def create_app():
@@ -44,6 +45,7 @@ def create_app():
     app.register_blueprint(transfers_bp,      url_prefix='/api/transfers')
     app.register_blueprint(adjustments_bp,    url_prefix='/api/adjustments')
     app.register_blueprint(stock_bp,          url_prefix='/api/stock')
+    app.register_blueprint(admin_bp,          url_prefix='/api/admin')
 
     return app
 

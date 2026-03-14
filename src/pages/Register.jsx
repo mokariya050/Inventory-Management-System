@@ -13,6 +13,8 @@ export default function Register() {
   const [error, setError]   = useState('')
   const [info, setInfo]     = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPwd, setShowPwd]           = useState(false)
+  const [showPwdRepeat, setShowPwdRepeat] = useState(false)
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
@@ -90,6 +92,16 @@ export default function Register() {
             </div>
             <div className="col-lg-7">
               <div className="p-5">
+                <div className="text-center mb-4">
+                  <svg width="38" height="38" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <rect x="2" y="15" width="20" height="5" rx="2" fill="#575D90"/>
+                    <rect x="5" y="9.5" width="14" height="5" rx="2" fill="#575D90" fillOpacity="0.72"/>
+                    <rect x="8" y="4" width="8" height="5" rx="2" fill="#575D90" fillOpacity="0.44"/>
+                  </svg>
+                  <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#575D90', letterSpacing: '-0.01em', marginTop: 6 }}>
+                    CoreInventory
+                  </div>
+                </div>
                 <div className="text-center">
                   <h4 className="text-dark mb-4">Create an Account!</h4>
                 </div>
@@ -137,26 +149,50 @@ export default function Register() {
                     </div>
                     <div className="mb-3 row">
                       <div className="col-sm-6 mb-3 mb-sm-0">
-                        <input
-                          className="form-control form-control-user"
-                          type="password"
-                          placeholder="Password"
-                          name="password"
-                          value={form.password}
-                          onChange={handleChange}
-                          required
-                        />
+                        <div style={{ position: 'relative' }}>
+                          <input
+                            className="form-control form-control-user"
+                            type={showPwd ? 'text' : 'password'}
+                            placeholder="Password"
+                            name="password"
+                            value={form.password}
+                            onChange={handleChange}
+                            style={{ paddingRight: 36 }}
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPwd((v) => !v)}
+                            tabIndex={-1}
+                            aria-label={showPwd ? 'Hide password' : 'Show password'}
+                            style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', padding: 4, cursor: 'pointer', color: '#9ca3af', lineHeight: 1 }}
+                          >
+                            <i className={showPwd ? 'fas fa-eye-slash' : 'fas fa-eye'} style={{ fontSize: 14 }} />
+                          </button>
+                        </div>
                       </div>
                       <div className="col-sm-6">
-                        <input
-                          className="form-control form-control-user"
-                          type="password"
-                          placeholder="Re-Enter Password"
-                          name="password_repeat"
-                          value={form.password_repeat}
-                          onChange={handleChange}
-                          required
-                        />
+                        <div style={{ position: 'relative' }}>
+                          <input
+                            className="form-control form-control-user"
+                            type={showPwdRepeat ? 'text' : 'password'}
+                            placeholder="Re-Enter Password"
+                            name="password_repeat"
+                            value={form.password_repeat}
+                            onChange={handleChange}
+                            style={{ paddingRight: 36 }}
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPwdRepeat((v) => !v)}
+                            tabIndex={-1}
+                            aria-label={showPwdRepeat ? 'Hide password' : 'Show password'}
+                            style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', padding: 4, cursor: 'pointer', color: '#9ca3af', lineHeight: 1 }}
+                          >
+                            <i className={showPwdRepeat ? 'fas fa-eye-slash' : 'fas fa-eye'} style={{ fontSize: 14 }} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <button className="btn btn-primary d-block w-100 btn-user" type="submit" disabled={loading}>

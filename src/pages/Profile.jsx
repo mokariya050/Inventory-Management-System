@@ -4,20 +4,20 @@ import { useAuth } from '../context/AuthContext'
 
 export default function Profile() {
   const { updateUser } = useAuth()
-  const [projects, setProjects] = useState([])
-  const [userForm, setUserForm] = useState({ username: '', email: '', name: '', role: '' })
+  const [userForm, setUserForm] = useState({ username: '', email: '', name: '' })
   const [contactForm, setContactForm] = useState({ address: '', city: '', country: '' })
-  const [avatarUrl, setAvatarUrl] = useState('/assets/img/dogs/image2.jpeg')
+  const [userRole, setUserRole]     = useState(null)
+  const [avatarUrl, setAvatarUrl]   = useState('/assets/img/dogs/image2.jpeg')
   const [userMsg, setUserMsg]       = useState('')
   const [contactMsg, setContactMsg] = useState('')
 
   useEffect(() => {
     api.getMe().then((u) => {
-      setUserForm({ username: u.username || '', email: u.email || '', name: u.name || '', role: u.role || '' })
+      setUserForm({ username: u.username || '', email: u.email || '', name: u.name || '' })
       setContactForm({ address: u.address || '', city: u.city || '', country: u.country || '' })
+      setUserRole(u.role || null)
       if (u.avatar_url) setAvatarUrl(u.avatar_url)
     }).catch(console.error)
-    api.getProjects().then(setProjects).catch(console.error)
   }, [])
 
   const handleUserChange    = (e) => setUserForm({ ...userForm, [e.target.name]: e.target.value })
@@ -67,68 +67,8 @@ export default function Profile() {
               </div>
             </div>
           </div>
-          <div className="card shadow mb-4">
-            <div className="card-header py-3">
-              <h6 className="text-primary m-0 fw-bold">Projects</h6>
-            </div>
-            <div className="card-body">
-              {projects.map((p) => (
-                <div key={p.id}>
-                  <h4 className="small fw-bold">
-                    {p.name}
-                    <span className="float-end">{p.progress === 100 ? 'Complete!' : `${p.progress}%`}</span>
-                  </h4>
-                  <div className="progress mb-3 progress-sm">
-                    <div
-                      className={`progress-bar ${p.color}`}
-                      aria-valuenow={p.progress}
-                      aria-valuemin="0"
-                      aria-valuemax="100"
-                      style={{ width: `${p.progress}%` }}
-                    >
-                      <span className="visually-hidden">{p.progress}%</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
         <div className="col-lg-8">
-          <div className="row mb-3 d-none">
-            <div className="col">
-              <div className="card text-white bg-primary shadow">
-                <div className="card-body">
-                  <div className="row mb-2">
-                    <div className="col">
-                      <p className="m-0">Performance</p>
-                      <p className="m-0"><strong>65.2%</strong></p>
-                    </div>
-                    <div className="col-auto"><i className="fas fa-rocket fa-2x"></i></div>
-                  </div>
-                  <p className="text-white-50 m-0 small">
-                    <i className="fas fa-arrow-up"></i>&nbsp;5% since last month
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="col">
-              <div className="card text-white bg-success shadow">
-                <div className="card-body">
-                  <div className="row mb-2">
-                    <div className="col">
-                      <p className="m-0">Performance</p>
-                      <p className="m-0"><strong>65.2%</strong></p>
-                    </div>
-                    <div className="col-auto"><i className="fas fa-rocket fa-2x"></i></div>
-                  </div>
-                  <p className="text-white-50 m-0 small">
-                    <i className="fas fa-arrow-up"></i>&nbsp;5% since last month
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
           <div className="row">
             <div className="col">
               <div className="card shadow mb-3">
@@ -185,16 +125,24 @@ export default function Profile() {
                       </div>
                       <div className="col">
                         <div className="mb-3">
-                          <label className="form-label" htmlFor="role"><strong>Role</strong></label>
-                          <input
-                            className="form-control"
-                            type="text"
-                            id="role"
-                            placeholder="Administrator"
-                            name="role"
-                            value={userForm.role}
-                            onChange={handleUserChange}
-                          />
+                          <label className="form-label"><strong>Role</strong></label>
+                          <div>
+                            {userRole ? (
+                              <span className="badge fs-6 fw-semibold text-capitalize"
+                                style={{
+                                  background: userRole === 'admin' ? '#fee2e2' : userRole === 'manager' ? '#fef9c3' : '#dcfce7',
+                                  color:      userRole === 'admin' ? '#dc2626' : userRole === 'manager' ? '#b45309' : '#16a34a',
+                                  borderRadius: 8, padding: '5px 14px',
+                                }}>
+                                {userRole}
+                              </span>
+                            ) : (
+                              <span className="badge fs-6 fw-semibold" style={{ background: '#f3f4f6', color: '#9ca3af', borderRadius: 8, padding: '5px 14px' }}>
+                                No Role Assigned
+                              </span>
+                            )}
+                            <div className="form-text mt-1">Roles are assigned by your manager or admin.</div>
+                          </div>
                         </div>
                       </div>
                     </div>

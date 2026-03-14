@@ -10,6 +10,8 @@ export default function RecoverPassword() {
   const [info, setInfo]       = useState('')
   const [error, setError]     = useState('')
   const [loading, setLoading] = useState(false)
+  const [showNewPwd, setShowNewPwd]         = useState(false)
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false)
 
   // Step 1 — send OTP
   const handleSendOtp = async (e) => {
@@ -110,24 +112,48 @@ export default function RecoverPassword() {
           />
         </div>
         <div className="mb-3">
-          <input
-            className="form-control form-control-user"
-            type="password"
-            placeholder="New Password"
-            value={passwords.new_password}
-            onChange={(e) => setPasswords({ ...passwords, new_password: e.target.value })}
-            required
-          />
+          <div style={{ position: 'relative' }}>
+            <input
+              className="form-control form-control-user"
+              type={showNewPwd ? 'text' : 'password'}
+              placeholder="New Password"
+              value={passwords.new_password}
+              onChange={(e) => setPasswords({ ...passwords, new_password: e.target.value })}
+              style={{ paddingRight: 36 }}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowNewPwd((v) => !v)}
+              tabIndex={-1}
+              aria-label={showNewPwd ? 'Hide password' : 'Show password'}
+              style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', padding: 4, cursor: 'pointer', color: '#9ca3af', lineHeight: 1 }}
+            >
+              <i className={showNewPwd ? 'fas fa-eye-slash' : 'fas fa-eye'} style={{ fontSize: 14 }} />
+            </button>
+          </div>
         </div>
         <div className="mb-3">
-          <input
-            className="form-control form-control-user"
-            type="password"
-            placeholder="Confirm New Password"
-            value={passwords.confirm_password}
-            onChange={(e) => setPasswords({ ...passwords, confirm_password: e.target.value })}
-            required
-          />
+          <div style={{ position: 'relative' }}>
+            <input
+              className="form-control form-control-user"
+              type={showConfirmPwd ? 'text' : 'password'}
+              placeholder="Confirm New Password"
+              value={passwords.confirm_password}
+              onChange={(e) => setPasswords({ ...passwords, confirm_password: e.target.value })}
+              style={{ paddingRight: 36 }}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPwd((v) => !v)}
+              tabIndex={-1}
+              aria-label={showConfirmPwd ? 'Hide password' : 'Show password'}
+              style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', padding: 4, cursor: 'pointer', color: '#9ca3af', lineHeight: 1 }}
+            >
+              <i className={showConfirmPwd ? 'fas fa-eye-slash' : 'fas fa-eye'} style={{ fontSize: 14 }} />
+            </button>
+          </div>
         </div>
         <button
           className="btn btn-primary d-block w-100 btn-user"
@@ -178,6 +204,16 @@ export default function RecoverPassword() {
                 </div>
                 <div className="col-lg-6">
                   <div className="p-5">
+                    <div className="text-center mb-4">
+                      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <rect x="2" y="15" width="20" height="5" rx="2" fill="#575D90"/>
+                        <rect x="5" y="9.5" width="14" height="5" rx="2" fill="#575D90" fillOpacity="0.72"/>
+                        <rect x="8" y="4" width="8" height="5" rx="2" fill="#575D90" fillOpacity="0.44"/>
+                      </svg>
+                      <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#575D90', letterSpacing: '-0.01em', marginTop: 6 }}>
+                        CoreInventory
+                      </div>
+                    </div>
                     <div className="text-center">
                       <h4 className="text-dark mb-4">Reset Password</h4>
                     </div>

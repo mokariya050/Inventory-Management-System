@@ -89,4 +89,9 @@ export const api = {
   // ── Notifications & Messages ─────────────────────────────────────
   getNotifications: () => request('/api/notifications'),
   getInbox:         () => request('/api/messages/inbox'),
+
+  // ── Admin – User Management ──────────────────────────────────────
+  getAdminUsers:   ()         => request('/api/admin/users'),
+  assignUserRole:  (id, role) => request(`/api/admin/users/${id}/role`, { method: 'PUT',    body: JSON.stringify({ role }) }),
+  deleteAdminUser: (id)       => request(`/api/admin/users/${id}`,      { method: 'DELETE' }),
 }
