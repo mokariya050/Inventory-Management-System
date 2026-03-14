@@ -1,4 +1,38 @@
+import { useState, useEffect, useCallback } from 'react'
+import { api } from '../services/api'
+
 export default function Table() {
+  const [employees, setEmployees] = useState([])
+  const [total, setTotal]         = useState(0)
+  const [page, setPage]           = useState(1)
+  const [pageSize, setPageSize]   = useState(10)
+  const [search, setSearch]       = useState('')
+  const [searchInput, setSearchInput] = useState('')
+
+  const fetchEmployees = useCallback(() => {
+    api.getEmployees({ page, pageSize, search })
+      .then((res) => { setEmployees(res.data); setTotal(res.total) })
+      .catch(console.error)
+  }, [page, pageSize, search])
+
+  useEffect(() => { fetchEmployees() }, [fetchEmployees])
+
+  const totalPages = Math.ceil(total / pageSize)
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault()
+    setPage(1)
+    setSearch(searchInput)
+  }
+
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value))
+    setPage(1)
+  }
+
+  const start = total === 0 ? 0 : (page - 1) * pageSize + 1
+  const end   = Math.min(page * pageSize, total)
+
   return (
     <>
       <h3 className="text-dark mb-4">Team</h3>
@@ -12,7 +46,11 @@ export default function Table() {
               <div className="dataTables_length" aria-controls="dataTable">
                 <label className="form-label">
                   Show&nbsp;
-                  <select className="d-inline-block form-select form-select-sm" defaultValue="10">
+                  <select
+                    className="d-inline-block form-select form-select-sm"
+                    value={pageSize}
+                    onChange={handlePageSizeChange}
+                  >
                     <option value="10">10</option>
                     <option value="25">25</option>
                     <option value="50">50</option>
@@ -24,14 +62,18 @@ export default function Table() {
             </div>
             <div className="col-md-6">
               <div className="text-md-end dataTables_filter">
-                <label className="form-label">
-                  <input
-                    type="search"
-                    className="form-control form-control-sm"
-                    aria-controls="dataTable"
-                    placeholder="Search"
-                  />
-                </label>
+                <form onSubmit={handleSearchSubmit} className="d-inline">
+                  <label className="form-label">
+                    <input
+                      type="search"
+                      className="form-control form-control-sm"
+                      aria-controls="dataTable"
+                      placeholder="Search"
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                    />
+                  </label>
+                </form>
               </div>
             </div>
           </div>
@@ -48,116 +90,30 @@ export default function Table() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>
-                    <img className="rounded-circle me-2" width="30" height="30" src="/assets/img/avatars/avatar1.jpeg" alt="" />
-                    Airi Satou
-                  </td>
-                  <td>Accountant</td>
-                  <td>Tokyo</td>
-                  <td>33</td>
-                  <td>2008/11/28</td>
-                  <td>$162,700</td>
-                </tr>
-                <tr>
-                  <td>
-                    <img className="rounded-circle me-2" width="30" height="30" src="/assets/img/avatars/avatar2.jpeg" alt="" />
-                    Angelica Ramos
-                  </td>
-                  <td>Chief Executive Officer (CEO)</td>
-                  <td>London</td>
-                  <td>47</td>
-                  <td>2009/10/09</td>
-                  <td>$1,200,000</td>
-                </tr>
-                <tr>
-                  <td>
-                    <img className="rounded-circle me-2" width="30" height="30" src="/assets/img/avatars/avatar3.jpeg" alt="" />
-                    Ashton Cox
-                  </td>
-                  <td>Junior Technical Author</td>
-                  <td>San Francisco</td>
-                  <td>66</td>
-                  <td>2009/01/12</td>
-                  <td>$86,000</td>
-                </tr>
-                <tr>
-                  <td>
-                    <img className="rounded-circle me-2" width="30" height="30" src="/assets/img/avatars/avatar4.jpeg" alt="" />
-                    Bradley Greer
-                  </td>
-                  <td>Software Engineer</td>
-                  <td>London</td>
-                  <td>41</td>
-                  <td>2012/10/13</td>
-                  <td>$132,000</td>
-                </tr>
-                <tr>
-                  <td>
-                    <img className="rounded-circle me-2" width="30" height="30" src="/assets/img/avatars/avatar5.jpeg" alt="" />
-                    Brenden Wagner
-                  </td>
-                  <td>Software Engineer</td>
-                  <td>San Francisco</td>
-                  <td>28</td>
-                  <td>2011/06/07</td>
-                  <td>$206,850</td>
-                </tr>
-                <tr>
-                  <td>
-                    <img className="rounded-circle me-2" width="30" height="30" src="/assets/img/avatars/avatar1.jpeg" alt="" />
-                    Brielle Williamson
-                  </td>
-                  <td>Integration Specialist</td>
-                  <td>New York</td>
-                  <td>61</td>
-                  <td>2012/12/02</td>
-                  <td>$372,000</td>
-                </tr>
-                <tr>
-                  <td>
-                    <img className="rounded-circle me-2" width="30" height="30" src="/assets/img/avatars/avatar2.jpeg" alt="" />
-                    Bruno Nash
-                  </td>
-                  <td>Software Engineer</td>
-                  <td>London</td>
-                  <td>38</td>
-                  <td>2011/05/03</td>
-                  <td>$163,500</td>
-                </tr>
-                <tr>
-                  <td>
-                    <img className="rounded-circle me-2" width="30" height="30" src="/assets/img/avatars/avatar3.jpeg" alt="" />
-                    Caesar Vance
-                  </td>
-                  <td>Pre-Sales Support</td>
-                  <td>New York</td>
-                  <td>21</td>
-                  <td>2011/12/12</td>
-                  <td>$106,450</td>
-                </tr>
-                <tr>
-                  <td>
-                    <img className="rounded-circle me-2" width="30" height="30" src="/assets/img/avatars/avatar4.jpeg" alt="" />
-                    Cara Stevens
-                  </td>
-                  <td>Sales Assistant</td>
-                  <td>New York</td>
-                  <td>46</td>
-                  <td>2011/12/06</td>
-                  <td>$145,600</td>
-                </tr>
-                <tr>
-                  <td>
-                    <img className="rounded-circle me-2" width="30" height="30" src="/assets/img/avatars/avatar5.jpeg" alt="" />
-                    Cedric Kelly
-                  </td>
-                  <td>Senior JavaScript Developer</td>
-                  <td>Edinburgh</td>
-                  <td>22</td>
-                  <td>2012/03/29</td>
-                  <td>$433,060</td>
-                </tr>
+                {employees.map((emp) => (
+                  <tr key={emp.id}>
+                    <td>
+                      <img
+                        className="rounded-circle me-2"
+                        width="30"
+                        height="30"
+                        src={emp.avatarUrl}
+                        alt=""
+                      />
+                      {emp.name}
+                    </td>
+                    <td>{emp.position}</td>
+                    <td>{emp.office}</td>
+                    <td>{emp.age}</td>
+                    <td>{emp.startDate}</td>
+                    <td>${Number(emp.salary).toLocaleString()}</td>
+                  </tr>
+                ))}
+                {employees.length === 0 && (
+                  <tr>
+                    <td colSpan="6" className="text-center text-muted py-3">No results found</td>
+                  </tr>
+                )}
               </tbody>
               <tfoot>
                 <tr>
@@ -174,30 +130,30 @@ export default function Table() {
           <div className="row">
             <div className="col-md-6 align-self-center">
               <p id="dataTable_info" className="dataTables_info" role="status" aria-live="polite">
-                Showing 1 to 10 of 27
+                {total > 0 ? `Showing ${start} to ${end} of ${total}` : 'No entries'}
               </p>
             </div>
             <div className="col-md-6">
               <nav className="d-lg-flex justify-content-lg-end dataTables_paginate paging_simple_numbers">
                 <ul className="pagination">
-                  <li className="page-item disabled">
-                    <a className="page-link" aria-label="Previous" href="#">
+                  <li className={`page-item${page === 1 ? ' disabled' : ''}`}>
+                    <button className="page-link" onClick={() => setPage(page - 1)} disabled={page === 1}>
                       <span aria-hidden="true">«</span>
-                    </a>
+                    </button>
                   </li>
-                  <li className="page-item active">
-                    <a className="page-link" href="#">1</a>
-                  </li>
-                  <li className="page-item">
-                    <a className="page-link" href="#">2</a>
-                  </li>
-                  <li className="page-item">
-                    <a className="page-link" href="#">3</a>
-                  </li>
-                  <li className="page-item">
-                    <a className="page-link" aria-label="Next" href="#">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                    <li key={p} className={`page-item${p === page ? ' active' : ''}`}>
+                      <button className="page-link" onClick={() => setPage(p)}>{p}</button>
+                    </li>
+                  ))}
+                  <li className={`page-item${page === totalPages || totalPages === 0 ? ' disabled' : ''}`}>
+                    <button
+                      className="page-link"
+                      onClick={() => setPage(page + 1)}
+                      disabled={page === totalPages || totalPages === 0}
+                    >
                       <span aria-hidden="true">»</span>
-                    </a>
+                    </button>
                   </li>
                 </ul>
               </nav>

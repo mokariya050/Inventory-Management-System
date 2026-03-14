@@ -1,6 +1,32 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { api } from '../services/api'
+import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
+  const navigate = useNavigate()
+  const { login } = useAuth()
+  const [form, setForm]   = useState({ email: '', password: '' })
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      const data = await api.login({ email: form.email, password: form.password })
+      login(data.access_token, data.user)
+      navigate('/')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div
       className="container"
@@ -25,15 +51,19 @@ export default function Login() {
                     <div className="text-center">
                       <h4 className="text-dark mb-4">Welcome Back!</h4>
                     </div>
-                    <form className="user">
+                    {error && <div className="alert alert-danger py-2">{error}</div>}
+                    <form className="user" onSubmit={handleSubmit}>
                       <div className="mb-3">
                         <input
                           className="form-control form-control-user"
                           type="email"
                           id="exampleInputEmail"
                           aria-describedby="user_id"
-                          placeholder="User ID"
-                          name="user_id"
+                          placeholder="Email Address"
+                          name="email"
+                          value={form.email}
+                          onChange={handleChange}
+                          required
                         />
                       </div>
                       <div className="mb-3">
@@ -43,6 +73,9 @@ export default function Login() {
                           id="exampleInputPassword"
                           placeholder="Password"
                           name="password"
+                          value={form.password}
+                          onChange={handleChange}
+                          required
                         />
                       </div>
                       <div className="mb-3">
@@ -59,8 +92,12 @@ export default function Login() {
                           </div>
                         </div>
                       </div>
-                      <button className="btn btn-primary d-block w-100 btn-user" type="submit">
-                        Login
+                      <button
+                        className="btn btn-primary d-block w-100 btn-user"
+                        type="submit"
+                        disabled={loading}
+                      >
+                        {loading ? 'Logging in…' : 'Login'}
                       </button>
                       <hr />
                     </form>

@@ -1,19 +1,6 @@
 import { Line } from 'react-chartjs-2'
 
-const data = {
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-  datasets: [
-    {
-      label: 'Earnings',
-      fill: true,
-      data: [0, 10000, 5000, 15000, 10000, 20000, 15000, 25000],
-      backgroundColor: 'rgba(78, 115, 223, 0.05)',
-      borderColor: 'rgba(78, 115, 223, 1)',
-    },
-  ],
-}
-
-const options = {
+const chartOptions = {
   plugins: {
     legend: { display: false },
   },
@@ -47,10 +34,23 @@ const options = {
   },
 }
 
-export default function EarningsChart() {
+export default function EarningsChart({ labels, values }) {
+  const data = {
+    labels: labels || [],
+    datasets: [
+      {
+        label: 'Earnings',
+        fill: true,
+        data: values || [],
+        backgroundColor: 'rgba(78, 115, 223, 0.05)',
+        borderColor: 'rgba(78, 115, 223, 1)',
+      },
+    ],
+  }
+
   return (
     <div className="chart-area">
-      <Line data={data} options={options} />
+      <Line data={data} options={chartOptions} />
     </div>
   )
 }

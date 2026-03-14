@@ -1,4 +1,51 @@
+import { useState, useEffect } from 'react'
+import { api } from '../services/api'
+import { useAuth } from '../context/AuthContext'
+
 export default function Profile() {
+  const { updateUser } = useAuth()
+  const [projects, setProjects] = useState([])
+  const [userForm, setUserForm] = useState({ username: '', email: '', name: '', role: '' })
+  const [contactForm, setContactForm] = useState({ address: '', city: '', country: '' })
+  const [avatarUrl, setAvatarUrl] = useState('/assets/img/dogs/image2.jpeg')
+  const [userMsg, setUserMsg]       = useState('')
+  const [contactMsg, setContactMsg] = useState('')
+
+  useEffect(() => {
+    api.getMe().then((u) => {
+      setUserForm({ username: u.username || '', email: u.email || '', name: u.name || '', role: u.role || '' })
+      setContactForm({ address: u.address || '', city: u.city || '', country: u.country || '' })
+      if (u.avatar_url) setAvatarUrl(u.avatar_url)
+    }).catch(console.error)
+    api.getProjects().then(setProjects).catch(console.error)
+  }, [])
+
+  const handleUserChange    = (e) => setUserForm({ ...userForm, [e.target.name]: e.target.value })
+  const handleContactChange = (e) => setContactForm({ ...contactForm, [e.target.name]: e.target.value })
+
+  const handleUserSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      const updated = await api.updateMe(userForm)
+      updateUser(updated)
+      setUserMsg('Settings saved.')
+      setTimeout(() => setUserMsg(''), 3000)
+    } catch (err) {
+      setUserMsg(err.message)
+    }
+  }
+
+  const handleContactSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      await api.updateContact(contactForm)
+      setContactMsg('Contact saved.')
+      setTimeout(() => setContactMsg(''), 3000)
+    } catch (err) {
+      setContactMsg(err.message)
+    }
+  }
+
   return (
     <>
       <h3 className="text-dark mb-4">Profile</h3>
@@ -8,7 +55,7 @@ export default function Profile() {
             <div className="card-body text-center shadow">
               <img
                 className="rounded-circle mt-4 mb-3"
-                src="/assets/img/dogs/image2.jpeg"
+                src={avatarUrl}
                 width="160"
                 height="160"
                 alt="profile"
@@ -25,76 +72,25 @@ export default function Profile() {
               <h6 className="text-primary m-0 fw-bold">Projects</h6>
             </div>
             <div className="card-body">
-              <h4 className="small fw-bold">
-                Server migration<span className="float-end">20%</span>
-              </h4>
-              <div className="progress mb-3 progress-sm">
-                <div
-                  className="progress-bar bg-danger"
-                  aria-valuenow="20"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  style={{ width: '20%' }}
-                >
-                  <span className="visually-hidden">20%</span>
+              {projects.map((p) => (
+                <div key={p.id}>
+                  <h4 className="small fw-bold">
+                    {p.name}
+                    <span className="float-end">{p.progress === 100 ? 'Complete!' : `${p.progress}%`}</span>
+                  </h4>
+                  <div className="progress mb-3 progress-sm">
+                    <div
+                      className={`progress-bar ${p.color}`}
+                      aria-valuenow={p.progress}
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      style={{ width: `${p.progress}%` }}
+                    >
+                      <span className="visually-hidden">{p.progress}%</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <h4 className="small fw-bold">
-                Sales tracking<span className="float-end">40%</span>
-              </h4>
-              <div className="progress mb-3 progress-sm">
-                <div
-                  className="progress-bar bg-warning"
-                  aria-valuenow="40"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  style={{ width: '40%' }}
-                >
-                  <span className="visually-hidden">40%</span>
-                </div>
-              </div>
-              <h4 className="small fw-bold">
-                Customer Database<span className="float-end">60%</span>
-              </h4>
-              <div className="progress mb-3 progress-sm">
-                <div
-                  className="progress-bar bg-primary"
-                  aria-valuenow="60"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  style={{ width: '60%' }}
-                >
-                  <span className="visually-hidden">60%</span>
-                </div>
-              </div>
-              <h4 className="small fw-bold">
-                Payout Details<span className="float-end">80%</span>
-              </h4>
-              <div className="progress mb-3 progress-sm">
-                <div
-                  className="progress-bar bg-info"
-                  aria-valuenow="80"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  style={{ width: '80%' }}
-                >
-                  <span className="visually-hidden">80%</span>
-                </div>
-              </div>
-              <h4 className="small fw-bold">
-                Account setup<span className="float-end">Complete!</span>
-              </h4>
-              <div className="progress mb-3 progress-sm">
-                <div
-                  className="progress-bar bg-success"
-                  aria-valuenow="100"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  style={{ width: '100%' }}
-                >
-                  <span className="visually-hidden">100%</span>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -105,14 +101,10 @@ export default function Profile() {
                 <div className="card-body">
                   <div className="row mb-2">
                     <div className="col">
-                      <p className="m-0">Peformance</p>
-                      <p className="m-0">
-                        <strong>65.2%</strong>
-                      </p>
+                      <p className="m-0">Performance</p>
+                      <p className="m-0"><strong>65.2%</strong></p>
                     </div>
-                    <div className="col-auto">
-                      <i className="fas fa-rocket fa-2x"></i>
-                    </div>
+                    <div className="col-auto"><i className="fas fa-rocket fa-2x"></i></div>
                   </div>
                   <p className="text-white-50 m-0 small">
                     <i className="fas fa-arrow-up"></i>&nbsp;5% since last month
@@ -125,14 +117,10 @@ export default function Profile() {
                 <div className="card-body">
                   <div className="row mb-2">
                     <div className="col">
-                      <p className="m-0">Peformance</p>
-                      <p className="m-0">
-                        <strong>65.2%</strong>
-                      </p>
+                      <p className="m-0">Performance</p>
+                      <p className="m-0"><strong>65.2%</strong></p>
                     </div>
-                    <div className="col-auto">
-                      <i className="fas fa-rocket fa-2x"></i>
-                    </div>
+                    <div className="col-auto"><i className="fas fa-rocket fa-2x"></i></div>
                   </div>
                   <p className="text-white-50 m-0 small">
                     <i className="fas fa-arrow-up"></i>&nbsp;5% since last month
@@ -148,33 +136,34 @@ export default function Profile() {
                   <p className="text-primary m-0 fw-bold">User Settings</p>
                 </div>
                 <div className="card-body">
-                  <form>
+                  {userMsg && <div className="alert alert-info py-1 small">{userMsg}</div>}
+                  <form onSubmit={handleUserSubmit}>
                     <div className="row">
                       <div className="col">
                         <div className="mb-3">
-                          <label className="form-label" htmlFor="username">
-                            <strong>Username</strong>
-                          </label>
+                          <label className="form-label" htmlFor="username"><strong>Username</strong></label>
                           <input
                             className="form-control"
                             type="text"
                             id="username"
                             placeholder="user.name"
                             name="username"
+                            value={userForm.username}
+                            onChange={handleUserChange}
                           />
                         </div>
                       </div>
                       <div className="col">
                         <div className="mb-3">
-                          <label className="form-label" htmlFor="email">
-                            <strong>Email Address</strong>
-                          </label>
+                          <label className="form-label" htmlFor="email"><strong>Email Address</strong></label>
                           <input
                             className="form-control"
                             type="email"
                             id="email"
                             placeholder="user@example.com"
                             name="email"
+                            value={userForm.email}
+                            onChange={handleUserChange}
                           />
                         </div>
                       </div>
@@ -182,37 +171,35 @@ export default function Profile() {
                     <div className="row">
                       <div className="col">
                         <div className="mb-3">
-                          <label className="form-label" htmlFor="first_name">
-                            <strong>Name</strong>
-                          </label>
+                          <label className="form-label" htmlFor="name"><strong>Name</strong></label>
                           <input
                             className="form-control"
                             type="text"
-                            id="first_name"
+                            id="name"
                             placeholder="John"
-                            name="first_name"
+                            name="name"
+                            value={userForm.name}
+                            onChange={handleUserChange}
                           />
                         </div>
                       </div>
                       <div className="col">
                         <div className="mb-3">
-                          <label className="form-label" htmlFor="last_name">
-                            <strong>Role</strong>
-                          </label>
+                          <label className="form-label" htmlFor="role"><strong>Role</strong></label>
                           <input
                             className="form-control"
                             type="text"
-                            id="last_name"
-                            placeholder="Doe"
-                            name="last_name"
+                            id="role"
+                            placeholder="Administrator"
+                            name="role"
+                            value={userForm.role}
+                            onChange={handleUserChange}
                           />
                         </div>
                       </div>
                     </div>
                     <div className="mb-3">
-                      <button className="btn btn-primary btn-sm" type="submit">
-                        Save Settings
-                      </button>
+                      <button className="btn btn-primary btn-sm" type="submit">Save Settings</button>
                     </div>
                   </form>
                 </div>
@@ -222,53 +209,52 @@ export default function Profile() {
                   <p className="text-primary m-0 fw-bold">Contact Settings</p>
                 </div>
                 <div className="card-body">
-                  <form>
+                  {contactMsg && <div className="alert alert-info py-1 small">{contactMsg}</div>}
+                  <form onSubmit={handleContactSubmit}>
                     <div className="mb-3">
-                      <label className="form-label" htmlFor="address">
-                        <strong>Address</strong>
-                      </label>
+                      <label className="form-label" htmlFor="address"><strong>Address</strong></label>
                       <input
                         className="form-control"
                         type="text"
                         id="address"
                         placeholder="Sunset Blvd, 38"
                         name="address"
+                        value={contactForm.address}
+                        onChange={handleContactChange}
                       />
                     </div>
                     <div className="row">
                       <div className="col">
                         <div className="mb-3">
-                          <label className="form-label" htmlFor="city">
-                            <strong>City</strong>
-                          </label>
+                          <label className="form-label" htmlFor="city"><strong>City</strong></label>
                           <input
                             className="form-control"
                             type="text"
                             id="city"
                             placeholder="Los Angeles"
                             name="city"
+                            value={contactForm.city}
+                            onChange={handleContactChange}
                           />
                         </div>
                       </div>
                       <div className="col">
                         <div className="mb-3">
-                          <label className="form-label" htmlFor="country">
-                            <strong>Country</strong>
-                          </label>
+                          <label className="form-label" htmlFor="country"><strong>Country</strong></label>
                           <input
                             className="form-control"
                             type="text"
                             id="country"
                             placeholder="USA"
                             name="country"
+                            value={contactForm.country}
+                            onChange={handleContactChange}
                           />
                         </div>
                       </div>
                     </div>
                     <div className="mb-3">
-                      <button className="btn btn-primary btn-sm" type="submit">
-                        Save&nbsp;Settings
-                      </button>
+                      <button className="btn btn-primary btn-sm" type="submit">Save Settings</button>
                     </div>
                   </form>
                 </div>

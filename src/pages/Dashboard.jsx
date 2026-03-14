@@ -1,7 +1,28 @@
+import { useState, useEffect } from 'react'
+import { api } from '../services/api'
 import EarningsChart from '../components/charts/EarningsChart'
 import RevenueChart from '../components/charts/RevenueChart'
 
 export default function Dashboard() {
+  const [stats, setStats]         = useState(null)
+  const [earnings, setEarnings]   = useState({ labels: [], values: [] })
+  const [revenue, setRevenue]     = useState({ labels: [], values: [], colors: [] })
+  const [projects, setProjects]   = useState([])
+  const [tasks, setTasks]         = useState([])
+
+  useEffect(() => {
+    api.getDashboardStats().then(setStats).catch(console.error)
+    api.getEarnings().then(setEarnings).catch(console.error)
+    api.getRevenueSources().then(setRevenue).catch(console.error)
+    api.getProjects().then(setProjects).catch(console.error)
+    api.getTasks().then(setTasks).catch(console.error)
+  }, [])
+
+  const fmt = (n) =>
+    n !== undefined && n !== null
+      ? '$' + Number(n).toLocaleString()
+      : '—'
+
   return (
     <>
       <div className="d-sm-flex justify-content-between align-items-center mb-4">
@@ -21,7 +42,7 @@ export default function Dashboard() {
                     <span>Earnings (monthly)</span>
                   </div>
                   <div className="text-dark mb-0 fw-bold h5">
-                    <span>$40,000</span>
+                    <span>{stats ? fmt(stats.monthly_earnings) : '—'}</span>
                   </div>
                 </div>
                 <div className="col-auto">
@@ -40,7 +61,7 @@ export default function Dashboard() {
                     <span>Earnings (annual)</span>
                   </div>
                   <div className="text-dark mb-0 fw-bold h5">
-                    <span>$215,000</span>
+                    <span>{stats ? fmt(stats.annual_earnings) : '—'}</span>
                   </div>
                 </div>
                 <div className="col-auto">
@@ -61,19 +82,19 @@ export default function Dashboard() {
                   <div className="row g-0 align-items-center">
                     <div className="col-auto">
                       <div className="text-dark me-3 mb-0 fw-bold h5">
-                        <span>50%</span>
+                        <span>{stats ? `${stats.task_completion_pct}%` : '—'}</span>
                       </div>
                     </div>
                     <div className="col">
                       <div className="progress progress-sm">
                         <div
                           className="progress-bar bg-info"
-                          aria-valuenow="50"
+                          aria-valuenow={stats?.task_completion_pct ?? 0}
                           aria-valuemin="0"
                           aria-valuemax="100"
-                          style={{ width: '50%' }}
+                          style={{ width: `${stats?.task_completion_pct ?? 0}%` }}
                         >
-                          <span className="visually-hidden">50%</span>
+                          <span className="visually-hidden">{stats?.task_completion_pct ?? 0}%</span>
                         </div>
                       </div>
                     </div>
@@ -95,7 +116,7 @@ export default function Dashboard() {
                     <span>Pending Requests</span>
                   </div>
                   <div className="text-dark mb-0 fw-bold h5">
-                    <span>18</span>
+                    <span>{stats ? stats.pending_requests : '—'}</span>
                   </div>
                 </div>
                 <div className="col-auto">
@@ -131,7 +152,7 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="card-body">
-              <EarningsChart />
+              <EarningsChart labels={earnings.labels} values={earnings.values} />
             </div>
           </div>
         </div>
@@ -158,17 +179,13 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="card-body">
-              <RevenueChart />
+              <RevenueChart labels={revenue.labels} values={revenue.values} colors={revenue.colors} />
               <div className="text-center mt-4 small">
-                <span className="me-2">
-                  <i className="fas fa-circle text-primary"></i>&nbsp;Direct
-                </span>
-                <span className="me-2">
-                  <i className="fas fa-circle text-success"></i>&nbsp;Social
-                </span>
-                <span className="me-2">
-                  <i className="fas fa-circle text-info"></i>&nbsp;Refferal
-                </span>
+                {revenue.labels.map((label, i) => (
+                  <span key={label} className="me-2">
+                    <i className="fas fa-circle" style={{ color: revenue.colors?.[i] }}></i>&nbsp;{label}
+                  </span>
+                ))}
               </div>
             </div>
           </div>
@@ -182,134 +199,60 @@ export default function Dashboard() {
               <h6 className="text-primary m-0 fw-bold">Projects</h6>
             </div>
             <div className="card-body">
-              <h4 className="small fw-bold">
-                Server migration<span className="float-end">20%</span>
-              </h4>
-              <div className="progress mb-4">
-                <div
-                  className="progress-bar bg-danger"
-                  aria-valuenow="20"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  style={{ width: '20%' }}
-                >
-                  <span className="visually-hidden">20%</span>
+              {projects.map((p) => (
+                <div key={p.id}>
+                  <h4 className="small fw-bold">
+                    {p.name}
+                    <span className="float-end">{p.progress === 100 ? 'Complete!' : `${p.progress}%`}</span>
+                  </h4>
+                  <div className="progress mb-4">
+                    <div
+                      className={`progress-bar ${p.color}`}
+                      aria-valuenow={p.progress}
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      style={{ width: `${p.progress}%` }}
+                    >
+                      <span className="visually-hidden">{p.progress}%</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <h4 className="small fw-bold">
-                Sales tracking<span className="float-end">40%</span>
-              </h4>
-              <div className="progress mb-4">
-                <div
-                  className="progress-bar bg-warning"
-                  aria-valuenow="40"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  style={{ width: '40%' }}
-                >
-                  <span className="visually-hidden">40%</span>
-                </div>
-              </div>
-              <h4 className="small fw-bold">
-                Customer Database<span className="float-end">60%</span>
-              </h4>
-              <div className="progress mb-4">
-                <div
-                  className="progress-bar bg-primary"
-                  aria-valuenow="60"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  style={{ width: '60%' }}
-                >
-                  <span className="visually-hidden">60%</span>
-                </div>
-              </div>
-              <h4 className="small fw-bold">
-                Payout Details<span className="float-end">80%</span>
-              </h4>
-              <div className="progress mb-4">
-                <div
-                  className="progress-bar bg-info"
-                  aria-valuenow="80"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  style={{ width: '80%' }}
-                >
-                  <span className="visually-hidden">80%</span>
-                </div>
-              </div>
-              <h4 className="small fw-bold">
-                Account setup<span className="float-end">Complete!</span>
-              </h4>
-              <div className="progress mb-4">
-                <div
-                  className="progress-bar bg-success"
-                  aria-valuenow="100"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  style={{ width: '100%' }}
-                >
-                  <span className="visually-hidden">100%</span>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
+
           <div className="card shadow mb-4">
             <div className="card-header py-3">
               <h6 className="text-primary m-0 fw-bold">Todo List</h6>
             </div>
             <ul className="list-group list-group-flush">
-              <li className="list-group-item">
-                <div className="row g-0 align-items-center">
-                  <div className="col me-2">
-                    <h6 className="mb-0">
-                      <strong>Lunch meeting</strong>
-                    </h6>
-                    <span className="text-xs">10:30 AM</span>
-                  </div>
-                  <div className="col-auto">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" id="formCheck-1" />
-                      <label className="form-check-label" htmlFor="formCheck-1"></label>
+              {tasks.map((task) => (
+                <li key={task.id} className="list-group-item">
+                  <div className="row g-0 align-items-center">
+                    <div className="col me-2">
+                      <h6 className="mb-0">
+                        <strong>{task.title}</strong>
+                      </h6>
+                      <span className="text-xs">{task.dueTime}</span>
+                    </div>
+                    <div className="col-auto">
+                      <div className="form-check">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id={`task-${task.id}`}
+                          defaultChecked={task.completed}
+                        />
+                        <label className="form-check-label" htmlFor={`task-${task.id}`}></label>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </li>
-              <li className="list-group-item">
-                <div className="row g-0 align-items-center">
-                  <div className="col me-2">
-                    <h6 className="mb-0">
-                      <strong>Lunch meeting</strong>
-                    </h6>
-                    <span className="text-xs">11:30 AM</span>
-                  </div>
-                  <div className="col-auto">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" id="formCheck-2" />
-                      <label className="form-check-label" htmlFor="formCheck-2"></label>
-                    </div>
-                  </div>
-                </div>
-              </li>
-              <li className="list-group-item">
-                <div className="row g-0 align-items-center">
-                  <div className="col me-2">
-                    <h6 className="mb-0">
-                      <strong>Lunch meeting</strong>
-                    </h6>
-                    <span className="text-xs">12:30 AM</span>
-                  </div>
-                  <div className="col-auto">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" id="formCheck-3" />
-                      <label className="form-check-label" htmlFor="formCheck-3"></label>
-                    </div>
-                  </div>
-                </div>
-              </li>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
+
         <div className="col">
           <div className="row">
             <div className="col-lg-6 mb-4">

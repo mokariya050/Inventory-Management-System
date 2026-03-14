@@ -51,24 +51,6 @@ export default function Sidebar() {
               <span>Table</span>
             </NavLink>
           </li>
-          <li className="nav-item">
-            <NavLink
-              className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
-              to="/login"
-            >
-              <i className="far fa-user-circle"></i>
-              <span>Login</span>
-            </NavLink>
-          </li>
-          <li className="nav-item">
-            <NavLink
-              className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
-              to="/register"
-            >
-              <i className="fas fa-user-circle"></i>
-              <span>Register</span>
-            </NavLink>
-          </li>
         </ul>
         <div className="text-center d-none d-md-inline">
           <button

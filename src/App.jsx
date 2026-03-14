@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'
 import { SidebarProvider } from './context/SidebarContext'
+import ProtectedRoute from './components/ProtectedRoute'
 import DashboardLayout from './layouts/DashboardLayout'
 import AuthLayout from './layouts/AuthLayout'
 import Dashboard from './pages/Dashboard'
@@ -12,21 +14,25 @@ import RecoverPassword from './pages/RecoverPassword'
 export default function App() {
   return (
     <BrowserRouter>
-      <SidebarProvider>
-        <Routes>
-          <Route element={<DashboardLayout />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/table" element={<Table />} />
-            <Route path="/table-1" element={<Navigate to="/table" replace />} />
-          </Route>
-          <Route element={<AuthLayout />}>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/recover-password" element={<RecoverPassword />} />
-          </Route>
-        </Routes>
-      </SidebarProvider>
+      <AuthProvider>
+        <SidebarProvider>
+          <Routes>
+            <Route element={<ProtectedRoute />}>
+              <Route element={<DashboardLayout />}>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/table" element={<Table />} />
+                <Route path="/table-1" element={<Navigate to="/table" replace />} />
+              </Route>
+            </Route>
+            <Route element={<AuthLayout />}>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/recover-password" element={<RecoverPassword />} />
+            </Route>
+          </Routes>
+        </SidebarProvider>
+      </AuthProvider>
     </BrowserRouter>
   )
 }

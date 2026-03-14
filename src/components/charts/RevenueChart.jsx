@@ -1,28 +1,28 @@
 import { Doughnut } from 'react-chartjs-2'
 
-const data = {
-  labels: ['Direct', 'Social', 'Referral'],
-  datasets: [
-    {
-      label: '',
-      backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
-      borderColor: ['#ffffff', '#ffffff', '#ffffff'],
-      data: [50, 30, 15],
-    },
-  ],
-}
-
-const options = {
+const chartOptions = {
   plugins: {
     legend: { display: false },
   },
   maintainAspectRatio: false,
 }
 
-export default function RevenueChart() {
+export default function RevenueChart({ labels, values, colors }) {
+  const data = {
+    labels: labels || [],
+    datasets: [
+      {
+        label: '',
+        backgroundColor: colors || ['#4e73df', '#1cc88a', '#36b9cc'],
+        borderColor: (colors || ['#4e73df', '#1cc88a', '#36b9cc']).map(() => '#ffffff'),
+        data: values || [],
+      },
+    ],
+  }
+
   return (
     <div className="chart-area">
-      <Doughnut data={data} options={options} />
+      <Doughnut data={data} options={chartOptions} />
     </div>
   )
 }
