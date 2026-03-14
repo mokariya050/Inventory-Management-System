@@ -1,0 +1,800 @@
+/* =================================================================
+   CoreInventory – Global Design System
+   Modern, accessible UI built on Bootstrap 5 + brand theme.
+   ================================================================= */
+
+/* ── Tokens ────────────────────────────────────────────────────── */
+:root {
+  --ci-brand: #575D90;
+  --ci-brand-dark: #464A73;
+  --ci-brand-light: #DDDFE9;
+  --ci-surface: #f8f9fc;
+  --ci-card-radius: 14px;
+  --ci-btn-radius: 8px;
+  --ci-input-radius: 8px;
+  --ci-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.07), 0 2px 8px rgba(0, 0, 0, 0.05);
+  --ci-shadow: 0 2px 8px rgba(0, 0, 0, 0.07), 0 6px 24px rgba(0, 0, 0, 0.07);
+  --ci-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Base ──────────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+  background-color: var(--ci-surface);
+  color: #1f2937;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Accessibility: skip-to-content ───────────────────────────── */
+.skip-to-content {
+  position: fixed;
+  top: -60px;
+  left: 1rem;
+  padding: 10px 20px;
+  background: var(--ci-brand);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border-radius: 0 0 10px 10px;
+  text-decoration: none;
+  z-index: 99999;
+  transition: top 0.18s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.skip-to-content:focus {
+  top: 0;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ── Focus rings ───────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--ci-brand);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--ci-brand);
+  outline-offset: 2px;
+}
+
+/* ── Page enter animation ──────────────────────────────────────── */
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.container-fluid>* {
+  animation: pageEnter 0.22s ease-out both;
+}
+
+/* ── Layout ────────────────────────────────────────────────────── */
+#wrapper {
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#content-wrapper {
+  background: var(--ci-surface);
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#content {
+  flex: 1;
+}
+
+.container-fluid {
+  padding: 1.5rem 1.75rem;
+}
+
+/* ── Cards ─────────────────────────────────────────────────────── */
+.card {
+  border: none !important;
+  border-radius: var(--ci-card-radius) !important;
+  box-shadow: var(--ci-shadow-sm) !important;
+  transition: box-shadow 0.2s ease;
+}
+
+.card.shadow,
+.card.shadow-sm {
+  box-shadow: var(--ci-shadow-sm) !important;
+}
+
+.card.shadow-lg {
+  box-shadow: var(--ci-shadow-lg) !important;
+}
+
+.card-header {
+  background: #fff !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+  border-radius: var(--ci-card-radius) var(--ci-card-radius) 0 0 !important;
+  padding: 0.9rem 1.25rem !important;
+}
+
+.card-body {
+  padding: 1.25rem;
+}
+
+.card-header .fw-bold,
+.card-header .text-primary {
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+}
+
+/* ── Buttons ───────────────────────────────────────────────────── */
+.btn {
+  border-radius: var(--ci-btn-radius) !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem;
+  letter-spacing: 0.01em;
+  transition: all 0.15s ease;
+  line-height: 1.5;
+}
+
+.btn-sm {
+  border-radius: 6px !important;
+  font-size: 0.8125rem;
+}
+
+.btn-lg {
+  border-radius: 10px !important;
+}
+
+.btn-primary {
+  box-shadow: 0 1px 3px rgba(87, 93, 144, 0.25);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 14px rgba(87, 93, 144, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-outline-danger:hover {
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+}
+
+.btn-outline-primary:hover {
+  box-shadow: 0 2px 8px rgba(87, 93, 144, 0.25);
+}
+
+/* Auth page button */
+.btn-user {
+  border-radius: 10px !important;
+  padding: 0.65rem 1.25rem !important;
+  font-size: 0.9rem !important;
+}
+
+/* ── Forms ─────────────────────────────────────────────────────── */
+.form-control,
+.form-select {
+  border-radius: var(--ci-input-radius) !important;
+  border-color: #e5e7eb;
+  font-size: 0.875rem;
+  padding: 0.5rem 0.875rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--ci-brand) !important;
+  box-shadow: 0 0 0 3px rgba(87, 93, 144, 0.15) !important;
+}
+
+.form-control-user {
+  border-radius: 10px !important;
+  padding: 0.65rem 1rem !important;
+}
+
+.form-control-sm,
+.form-select-sm {
+  border-radius: 6px !important;
+  font-size: 0.8125rem;
+}
+
+.form-label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 5px;
+}
+
+.form-text {
+  font-size: 0.77rem;
+  color: #9ca3af;
+}
+
+.input-group-text {
+  border-color: #e5e7eb;
+  background: #f9fafb;
+  font-size: 0.875rem;
+}
+
+/* ── Tables ────────────────────────────────────────────────────── */
+.table {
+  font-size: 0.875rem;
+  margin-bottom: 0;
+}
+
+.table> :not(caption)>*>* {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+
+.table thead>tr>th {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb !important;
+  background: #f9fafb;
+  white-space: nowrap;
+}
+
+.table-hover>tbody>tr {
+  transition: background 0.1s;
+}
+
+.table-hover>tbody>tr:hover>* {
+  background-color: #f5f7ff;
+  --bs-table-accent-bg: transparent;
+}
+
+.table-responsive {
+  border-radius: 0 0 var(--ci-card-radius) var(--ci-card-radius);
+}
+
+/* ── Badges ────────────────────────────────────────────────────── */
+.badge {
+  border-radius: 7px !important;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 4px 9px;
+  line-height: 1.4;
+}
+
+/* ── Alerts ────────────────────────────────────────────────────── */
+.alert {
+  border-radius: 10px !important;
+  border: none !important;
+  font-size: 0.875rem;
+  padding: 0.6rem 1rem;
+}
+
+.alert-info {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.alert-danger {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.alert-success {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.alert-warning {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+/* ── Page headings ─────────────────────────────────────────────── */
+h1,
+h2,
+h3 {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+h3.text-dark {
+  font-size: 1.3rem !important;
+  color: #111827 !important;
+  margin-bottom: 1.25rem !important;
+}
+
+/* ── Sidebar ───────────────────────────────────────────────────── */
+.sidebar {
+  background: linear-gradient(180deg, #575D90 0%, #4a5080 100%);
+  min-height: 100vh;
+  /* Strict width — nothing can override these */
+  width: 14rem;
+  min-width: 14rem;
+  max-width: 14rem;
+  flex: 0 0 14rem;
+  /* Own flex layout — no Bootstrap navbar interference */
+  display: flex;
+  flex-direction: column;
+  /* Contain all children */
+  overflow: hidden;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  transition: width 0.25s ease, min-width 0.25s ease,
+              max-width 0.25s ease, flex-basis 0.25s ease;
+}
+
+.sidebar.toggled {
+  width: 4.375rem;
+  min-width: 4.375rem;
+  max-width: 4.375rem;
+  flex: 0 0 4.375rem;
+}
+
+/* Inner column container */
+.sidebar > div {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;       /* allow flex children to shrink & scroll */
+  overflow: hidden;
+  flex: 1;
+}
+
+/* Brand */
+.sidebar-brand {
+  height: 64px !important;
+  padding: 0 1.25rem !important;
+  gap: 10px;
+  text-decoration: none !important;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.sidebar-brand:hover {
+  opacity: 0.9;
+}
+
+.sidebar-brand-text {
+  font-size: 0.97rem !important;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition: opacity 0.15s ease;
+}
+
+.sidebar.toggled .sidebar-brand-text {
+  opacity: 0;
+  pointer-events: none;
+}
+
+hr.sidebar-divider {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+}
+
+#accordionSidebar {
+  /* Horizontal padding creates the 8px inset from sidebar edges for all pills */
+  padding: 0.5rem 0.5rem 1rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Scrollbar inside sidebar nav */
+#accordionSidebar::-webkit-scrollbar {
+  width: 3px;
+}
+
+#accordionSidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#accordionSidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+/* Collapsed sidebar: tighter horizontal padding to prevent icon overflow */
+.sidebar.toggled #accordionSidebar {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+/* Nav items */
+.sidebar .nav-item {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.sidebar .nav-link {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px;
+  /* No horizontal margin — inset comes from #accordionSidebar padding */
+  margin: 2px 0 !important;
+  padding: 9px 12px !important;
+  border-radius: 9px !important;
+  color: rgba(255, 255, 255, 0.68) !important;
+  font-size: 0.86rem;
+  font-weight: 500;
+  transition: background 0.14s, color 0.14s !important;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Collapsed: center the icon, hide the label */
+.sidebar.toggled .nav-link {
+  justify-content: center !important;
+  padding: 9px 0 !important;
+  gap: 0 !important;
+  width: 100%;
+}
+
+.sidebar .nav-link:hover {
+  background: rgba(255, 255, 255, 0.13) !important;
+  color: #fff !important;
+}
+
+.sidebar .nav-link.active {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.sidebar .nav-link i {
+  width: 16px;
+  text-align: center;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.sidebar .nav-link.active i {
+  opacity: 1;
+}
+
+.sidebar .nav-link span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity 0.15s ease;
+}
+
+.sidebar.toggled .nav-link span {
+  opacity: 0;
+  width: 0;
+  pointer-events: none;
+}
+
+/* Section headings */
+.sidebar-heading {
+  font-size: 0.6rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.15em !important;
+  color: rgba(255, 255, 255, 0.38) !important;
+  padding: 14px 12px 4px !important;
+  text-transform: uppercase !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity 0.15s ease;
+}
+
+.sidebar.toggled .sidebar-heading {
+  opacity: 0;
+  padding-top: 6px !important;
+  padding-bottom: 2px !important;
+  pointer-events: none;
+}
+
+/* Collapse toggle button */
+#sidebarToggle {
+  width: 2.1rem;
+  height: 2.1rem;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: none !important;
+  border-radius: 50% !important;
+  margin-bottom: 1rem;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+#sidebarToggle:hover {
+  background: rgba(255, 255, 255, 0.22) !important;
+}
+
+#sidebarToggle::after {
+  content: '\f104';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.78rem;
+  pointer-events: none;
+}
+
+.sidebar.toggled #sidebarToggle::after {
+  content: '\f105';
+}
+
+/* ── Topbar ────────────────────────────────────────────────────── */
+header[role="banner"] {
+  box-shadow: 0 1px 0 #e5e7eb, 0 2px 10px rgba(0, 0, 0, 0.04) !important;
+  background: #fff !important;
+}
+
+/* ── Footer ────────────────────────────────────────────────────── */
+.sticky-footer {
+  border-top: 1px solid #f0f0f0 !important;
+  padding: 0.9rem 0 !important;
+  font-size: 0.79rem !important;
+  color: #9ca3af !important;
+  background: #fff !important;
+}
+
+/* ── Auth pages ────────────────────────────────────────────────── */
+.bg-login-image {
+  background-size: cover;
+  background-position: center;
+  min-height: 260px;
+}
+
+.card.shadow-lg {
+  border-radius: 16px !important;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ── Skeleton loader ───────────────────────────────────────────── */
+.skeleton {
+  display: inline-block;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e4 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 6px;
+  animation: skeletonShimmer 1.5s ease infinite;
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* ── KPI stat cards ────────────────────────────────────────────── */
+.kpi-card {
+  border: none !important;
+  border-radius: var(--ci-card-radius) !important;
+  box-shadow: var(--ci-shadow-sm) !important;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  cursor: default;
+}
+
+.kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--ci-shadow-lg) !important;
+}
+
+.kpi-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.kpi-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  opacity: 0.72;
+  margin-bottom: 4px;
+}
+
+.kpi-value {
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.kpi-link {
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-decoration: none;
+  opacity: 0.65;
+  transition: opacity 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.kpi-link:hover {
+  opacity: 1;
+}
+
+/* ── Border-left card accent ────────────────────────────────────── */
+.border-left-primary {
+  border-left: 4px solid #575D90 !important;
+}
+
+.border-left-warning {
+  border-left: 4px solid #f59e0b !important;
+}
+
+.border-left-danger {
+  border-left: 4px solid #ef4444 !important;
+}
+
+.border-left-success {
+  border-left: 4px solid #10b981 !important;
+}
+
+.border-left-info {
+  border-left: 4px solid #06b6d4 !important;
+}
+
+/* ── Auth layout ────────────────────────────────────────────────── */
+.auth-bg {
+  background: linear-gradient(135deg, #575D90 0%, #3d4275 55%, #252a50 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.auth-panel {
+  width: 100%;
+  max-width: 440px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25), 0 4px 16px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  padding: 2.25rem 2.5rem 2rem;
+}
+
+.auth-logo-ring {
+  width: 52px;
+  height: 52px;
+  background: #DDDFE9;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.875rem;
+}
+
+.auth-heading {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.025em;
+  margin-bottom: 0.25rem;
+}
+
+.auth-subheading {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.auth-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+  font-size: 0.84rem;
+}
+
+.auth-links a {
+  color: #575D90;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-links a:hover {
+  text-decoration: underline;
+}
+
+/* Pending page */
+.pending-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f4f6fb 0%, #eef0f8 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.pending-card {
+  max-width: 480px;
+  width: 100%;
+  border-radius: 18px !important;
+  border: none !important;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12) !important;
+  overflow: hidden;
+}
+
+/* ── Misc helpers ──────────────────────────────────────────────── */
+hr {
+  opacity: 0.1 !important;
+}
+
+header[role="banner"] [aria-hidden="true"][style*="width: 1"] {
+  opacity: 0.5;
+}
+
+.modal-content {
+  border: none !important;
+  border-radius: var(--ci-card-radius) !important;
+  box-shadow: var(--ci-shadow-lg) !important;
+}
+
+/* ── React Hot Toast ────────────────────────────────────────────── */
+/* Toasts mount in a portal; font is inherited via data-hot-toast */
+[data-hot-toast] {
+  font-family: 'Nunito', system-ui, sans-serif !important;
+  font-size: 0.875rem !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+}

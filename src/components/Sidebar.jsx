@@ -15,14 +15,15 @@ export default function Sidebar() {
 
   return (
     <nav
-      className={`navbar align-items-start p-0 sidebar sidebar-dark accordion bg-gradient-primary navbar-dark${toggled ? ' toggled' : ''}`}
-      style={{ background: '#575D90' }}
+      aria-label="Main navigation"
+      className={`sidebar${toggled ? ' toggled' : ''}`}
     >
-      <div className="container-fluid d-flex flex-column p-0">
+      <div className="d-flex flex-column h-100">
         {/* Brand */}
         <a
           className="navbar-brand d-flex justify-content-center align-items-center m-0 sidebar-brand"
-          href="#"
+          href="/"
+          aria-label="CoreInventory home"
         >
           <div className="sidebar-brand-icon" style={{ lineHeight: 0 }}>
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -44,55 +45,49 @@ export default function Sidebar() {
           {isStaff && (
             <>
               <li className="nav-item">
-                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/" end>
+                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/" end title="Dashboard">
                   <i className="fas fa-tachometer-alt"></i>
                   <span>Dashboard</span>
                 </NavLink>
               </li>
 
-              <div className="sidebar-heading text-white-50 px-3 pt-3 pb-1" style={{ fontSize: '0.65rem', letterSpacing: '0.1em' }}>
-                INVENTORY
-              </div>
+              <div className="sidebar-heading">INVENTORY</div>
               <li className="nav-item">
-                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/products">
+                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/products" title="Products">
                   <i className="fas fa-box"></i>
                   <span>Products</span>
                 </NavLink>
               </li>
 
-              <div className="sidebar-heading text-white-50 px-3 pt-3 pb-1" style={{ fontSize: '0.65rem', letterSpacing: '0.1em' }}>
-                OPERATIONS
-              </div>
+              <div className="sidebar-heading">OPERATIONS</div>
               <li className="nav-item">
-                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/operations/receipts">
+                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/operations/receipts" title="Receipts">
                   <i className="fas fa-truck-loading"></i>
                   <span>Receipts</span>
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/operations/deliveries">
+                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/operations/deliveries" title="Deliveries">
                   <i className="fas fa-truck"></i>
                   <span>Deliveries</span>
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/operations/transfers">
+                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/operations/transfers" title="Transfers">
                   <i className="fas fa-exchange-alt"></i>
                   <span>Transfers</span>
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/operations/adjustments">
+                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/operations/adjustments" title="Adjustments">
                   <i className="fas fa-sliders-h"></i>
                   <span>Adjustments</span>
                 </NavLink>
               </li>
 
-              <div className="sidebar-heading text-white-50 px-3 pt-3 pb-1" style={{ fontSize: '0.65rem', letterSpacing: '0.1em' }}>
-                HISTORY
-              </div>
+              <div className="sidebar-heading">HISTORY</div>
               <li className="nav-item">
-                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/move-history">
+                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/move-history" title="Move History">
                   <i className="fas fa-history"></i>
                   <span>Move History</span>
                 </NavLink>
@@ -103,11 +98,9 @@ export default function Sidebar() {
           {/* ── Manager+ ──────────────────────────────────────────────── */}
           {isManager && (
             <>
-              <div className="sidebar-heading text-white-50 px-3 pt-3 pb-1" style={{ fontSize: '0.65rem', letterSpacing: '0.1em' }}>
-                SETTINGS
-              </div>
+              <div className="sidebar-heading">SETTINGS</div>
               <li className="nav-item">
-                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/settings/warehouses">
+                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/settings/warehouses" title="Warehouses">
                   <i className="fas fa-warehouse"></i>
                   <span>Warehouses</span>
                 </NavLink>
@@ -118,11 +111,9 @@ export default function Sidebar() {
           {/* ── Admin only ────────────────────────────────────────────── */}
           {isAdmin && (
             <>
-              <div className="sidebar-heading text-white-50 px-3 pt-3 pb-1" style={{ fontSize: '0.65rem', letterSpacing: '0.1em' }}>
-                ADMINISTRATION
-              </div>
+              <div className="sidebar-heading">ADMINISTRATION</div>
               <li className="nav-item">
-                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/admin/users">
+                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/admin/users" title="User Management">
                   <i className="fas fa-users-cog"></i>
                   <span>User Management</span>
                 </NavLink>
@@ -131,11 +122,9 @@ export default function Sidebar() {
           )}
 
           {/* ── Always visible ────────────────────────────────────────── */}
-          <div className="sidebar-heading text-white-50 px-3 pt-3 pb-1" style={{ fontSize: '0.65rem', letterSpacing: '0.1em' }}>
-            ACCOUNT
-          </div>
+          <div className="sidebar-heading">ACCOUNT</div>
           <li className="nav-item">
-            <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/profile">
+            <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/profile" title="My Profile">
               <i className="fas fa-user"></i>
               <span>My Profile</span>
             </NavLink>
@@ -149,6 +138,9 @@ export default function Sidebar() {
             id="sidebarToggle"
             onClick={toggleSidebar}
             type="button"
+            aria-label={toggled ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-expanded={!toggled}
+            aria-controls="accordionSidebar"
           />
         </div>
       </div>

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useSidebar } from '../context/SidebarContext'
 import { useAuth } from '../context/AuthContext'
-import { api } from '../services/api'
 
 // ── Page title map ──────────────────────────────────────────────────────────
 const PAGE_TITLES = {
@@ -61,16 +60,6 @@ function Avatar({ user, size = 36 }) {
   )
 }
 
-// ── Relative time helper ──────────────────────────────────────────────────────
-function relativeTime(dateStr) {
-  if (!dateStr) return ''
-  const s = Math.floor((Date.now() - new Date(dateStr)) / 1000)
-  if (s < 60) return 'just now'
-  if (s < 3600) return `${Math.floor(s / 60)}m ago`
-  if (s < 86400) return `${Math.floor(s / 3600)}h ago`
-  return `${Math.floor(s / 86400)}d ago`
-}
-
 // ── Click-outside hook ────────────────────────────────────────────────────────
 function useClickOutside(ref, close) {
   useEffect(() => {
@@ -86,26 +75,12 @@ function useClickOutside(ref, close) {
   }, [ref, close])
 }
 
-// ── Icon button ───────────────────────────────────────────────────────────────
+// ── Icon button style ─────────────────────────────────────────────────────────
 const iconBtnStyle = {
-  position: 'relative', background: 'none', border: 'none',
+  background: 'none', border: 'none',
   cursor: 'pointer', color: '#6b7280', fontSize: 17,
   padding: '6px 10px', borderRadius: 6, lineHeight: 1,
   transition: 'background 0.15s, color 0.15s',
-}
-
-// ── Unread dot ────────────────────────────────────────────────────────────────
-function UnreadDot() {
-  return (
-    <span
-      aria-hidden="true"
-      style={{
-        position: 'absolute', top: 5, right: 7,
-        width: 8, height: 8, borderRadius: '50%',
-        background: '#ef4444', border: '2px solid #fff',
-      }}
-    />
-  )
 }
 
 // ── Dropdown panel ────────────────────────────────────────────────────────────
@@ -136,66 +111,19 @@ function Dropdown({ label, children }) {
   )
 }
 
-// ── Panel header ──────────────────────────────────────────────────────────────
-function PanelHeader({ title, badge }) {
-  return (
-    <div style={{
-      padding: '12px 16px', borderBottom: '1px solid #f0f0f0',
-      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-    }}>
-      <span style={{ fontWeight: 700, fontSize: '0.84rem', color: '#111827' }}>{title}</span>
-      {badge > 0 && (
-        <span style={{ fontSize: '0.72rem', color: '#6b7280', background: '#f3f4f6', padding: '2px 7px', borderRadius: 12 }}>
-          {badge} unread
-        </span>
-      )}
-    </div>
-  )
-}
-
-// ── Empty state ───────────────────────────────────────────────────────────────
-function EmptyPanel({ text }) {
-  return (
-    <div style={{ padding: '28px 16px', textAlign: 'center', color: '#9ca3af', fontSize: '0.83rem' }}>
-      {text}
-    </div>
-  )
-}
-
-// ── Menu row button helper ────────────────────────────────────────────────────
-const menuRowBase = {
-  display: 'flex', alignItems: 'flex-start', gap: 10,
-  width: '100%', padding: '10px 16px', background: 'none',
-  border: 'none', borderBottom: '1px solid #fafafa',
-  cursor: 'pointer', textAlign: 'left',
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Topbar() {
   const { toggleSidebar } = useSidebar()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [notifications, setNotifications] = useState([])
-  const [messages, setMessages] = useState([])
 
   const pageMeta = getPageMeta(location.pathname)
-
-  useEffect(() => {
-    api.getNotifications().then(setNotifications).catch(console.error)
-    api.getInbox().then(setMessages).catch(console.error)
-  }, [])
 
   const handleLogout = () => {
     logout()
     navigate('/login')
   }
-
-  const unreadNotifs = notifications.filter((n) => !n.isRead).length
-  const unreadMsgs = messages.filter((m) => !m.isRead).length
-
-  const statusColor = (s) =>
-    s === 'online' ? '#22c55e' : s === 'away' ? '#f59e0b' : '#d1d5db'
 
   return (
     <header
@@ -230,141 +158,6 @@ export default function Topbar() {
 
       {/* Right actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.15rem' }}>
-
-        {/* ── Notifications ── */}
-        <Dropdown label="Notifications">
-          {[
-            ({ open, toggle }) => (
-              <button
-                key="trigger"
-                type="button"
-                aria-label={`Notifications${unreadNotifs > 0 ? `, ${unreadNotifs} unread` : ''}`}
-                aria-haspopup="menu"
-                aria-expanded={open}
-                onClick={toggle}
-                style={iconBtnStyle}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#f3f4f6'; e.currentTarget.style.color = '#374151' }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#6b7280' }}
-              >
-                <i className="fas fa-bell" aria-hidden="true"></i>
-                {unreadNotifs > 0 && <UnreadDot />}
-              </button>
-            ),
-            ({ close }) => (
-              <div key="panel">
-                <PanelHeader title="Notifications" badge={unreadNotifs} />
-                <div style={{ maxHeight: 300, overflowY: 'auto' }}>
-                  {notifications.length === 0
-                    ? <EmptyPanel text="No notifications" />
-                    : notifications.map((n) => (
-                      <button
-                        key={n.id}
-                        role="menuitem"
-                        type="button"
-                        onClick={close}
-                        style={menuRowBase}
-                        onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                      >
-                        <span style={{
-                          width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                          background: '#4f46e5', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}>
-                          <i className={`${n.icon || 'fas fa-info'} text-white`} style={{ fontSize: 12 }} aria-hidden="true"></i>
-                        </span>
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <div style={{ fontSize: '0.81rem', color: '#374151', lineHeight: 1.45 }}>{n.message}</div>
-                          <div style={{ fontSize: '0.71rem', color: '#9ca3af', marginTop: 2 }}>{relativeTime(n.date)}</div>
-                        </div>
-                        {!n.isRead && (
-                          <span aria-hidden="true" style={{ width: 7, height: 7, borderRadius: '50%', background: '#4f46e5', flexShrink: 0, marginTop: 5 }} />
-                        )}
-                      </button>
-                    ))
-                  }
-                </div>
-              </div>
-            ),
-          ]}
-        </Dropdown>
-
-        {/* ── Messages ── */}
-        <Dropdown label="Messages">
-          {[
-            ({ open, toggle }) => (
-              <button
-                key="trigger"
-                type="button"
-                aria-label={`Messages${unreadMsgs > 0 ? `, ${unreadMsgs} unread` : ''}`}
-                aria-haspopup="menu"
-                aria-expanded={open}
-                onClick={toggle}
-                style={iconBtnStyle}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#f3f4f6'; e.currentTarget.style.color = '#374151' }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#6b7280' }}
-              >
-                <i className="fas fa-envelope" aria-hidden="true"></i>
-                {unreadMsgs > 0 && <UnreadDot />}
-              </button>
-            ),
-            ({ close }) => (
-              <div key="panel">
-                <PanelHeader title="Messages" badge={unreadMsgs} />
-                <div style={{ maxHeight: 300, overflowY: 'auto' }}>
-                  {messages.length === 0
-                    ? <EmptyPanel text="No messages" />
-                    : messages.map((m) => (
-                      <button
-                        key={m.id}
-                        role="menuitem"
-                        type="button"
-                        onClick={close}
-                        style={menuRowBase}
-                        onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                      >
-                        <div style={{ position: 'relative', flexShrink: 0 }}>
-                          {m.senderAvatar
-                            ? <img src={m.senderAvatar} alt="" style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover' }} />
-                            : (
-                              <span style={{
-                                width: 34, height: 34, borderRadius: '50%', background: '#575D90', color: '#fff',
-                                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: 13, fontWeight: 700,
-                              }}>
-                                {(m.senderName || 'U')[0].toUpperCase()}
-                              </span>
-                            )
-                          }
-                          <span aria-hidden="true" style={{
-                            position: 'absolute', bottom: 1, right: 1,
-                            width: 9, height: 9, borderRadius: '50%',
-                            background: statusColor(m.onlineStatus), border: '2px solid #fff',
-                          }} />
-                        </div>
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 6 }}>
-                            <span style={{ fontWeight: 600, fontSize: '0.81rem', color: '#111827' }}>{m.senderName}</span>
-                            <span style={{ fontSize: '0.7rem', color: '#9ca3af', whiteSpace: 'nowrap', flexShrink: 0 }}>{relativeTime(m.sentAt)}</span>
-                          </div>
-                          <div style={{ fontSize: '0.79rem', color: '#6b7280', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 190 }}>
-                            {m.preview}
-                          </div>
-                        </div>
-                        {!m.isRead && (
-                          <span aria-hidden="true" style={{ width: 7, height: 7, borderRadius: '50%', background: '#4f46e5', flexShrink: 0, marginTop: 7 }} />
-                        )}
-                      </button>
-                    ))
-                  }
-                </div>
-              </div>
-            ),
-          ]}
-        </Dropdown>
-
-        {/* Divider */}
-        <div aria-hidden="true" style={{ width: 1, height: 22, background: '#e5e7eb', margin: '0 6px' }} />
 
         {/* ── User menu ── */}
         <Dropdown label="User menu">

@@ -1,6 +1,7 @@
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import './styles/bootstrap-theme.min.css'
 import './styles/bss-overrides.css'
+import './styles/app.css'
 import '@fortawesome/fontawesome-free/css/all.min.css'
 
 import {

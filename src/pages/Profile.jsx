@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import toast from 'react-hot-toast'
 import { api } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 
@@ -7,11 +8,7 @@ export default function Profile() {
   const [userForm, setUserForm] = useState({ username: '', email: '', name: '' })
   const [contactForm, setContactForm] = useState({ address: '', city: '', country: '', phone: '' })
   const [userRole, setUserRole]     = useState(null)
-  const [avatarUrl, setAvatarUrl]   = useState('/assets/img/dogs/image2.jpeg')
-  const [userMsg, setUserMsg]       = useState('')
-  const [contactMsg, setContactMsg] = useState('')
   const [pwdForm, setPwdForm]       = useState({ current_password: '', new_password: '', confirm_password: '' })
-  const [pwdMsg, setPwdMsg]         = useState({ text: '', type: '' })
   const [showCurrentPwd, setShowCurrentPwd] = useState(false)
   const [showNewPwd, setShowNewPwd]         = useState(false)
   const [showConfirmPwd, setShowConfirmPwd] = useState(false)
@@ -21,7 +18,6 @@ export default function Profile() {
       setUserForm({ username: u.username || '', email: u.email || '', name: u.name || '' })
       setContactForm({ address: u.address || '', city: u.city || '', country: u.country || '', phone: u.phone || '' })
       setUserRole(u.role || null)
-      if (u.avatar_url) setAvatarUrl(u.avatar_url)
     }).catch(console.error)
   }, [])
 
@@ -33,10 +29,9 @@ export default function Profile() {
     try {
       const updated = await api.updateMe(userForm)
       updateUser(updated)
-      setUserMsg('Settings saved.')
-      setTimeout(() => setUserMsg(''), 3000)
+      toast.success('User settings saved.')
     } catch (err) {
-      setUserMsg(err.message)
+      toast.error(err.message)
     }
   }
 
@@ -44,23 +39,20 @@ export default function Profile() {
     e.preventDefault()
     try {
       await api.updateContact(contactForm)
-      setContactMsg('Contact saved.')
-      setTimeout(() => setContactMsg(''), 3000)
+      toast.success('Contact details saved.')
     } catch (err) {
-      setContactMsg(err.message)
+      toast.error(err.message)
     }
   }
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault()
-    setPwdMsg({ text: '', type: '' })
     try {
       const data = await api.changePassword(pwdForm)
       setPwdForm({ current_password: '', new_password: '', confirm_password: '' })
-      setPwdMsg({ text: data.message, type: 'success' })
-      setTimeout(() => setPwdMsg({ text: '', type: '' }), 4000)
+      toast.success(data.message)
     } catch (err) {
-      setPwdMsg({ text: err.message, type: 'danger' })
+      toast.error(err.message)
     }
   }
 
@@ -71,18 +63,38 @@ export default function Profile() {
         <div className="col-lg-4">
           <div className="card mb-3">
             <div className="card-body text-center shadow">
-              <img
-                className="rounded-circle mt-4 mb-3"
-                src={avatarUrl}
-                width="160"
-                height="160"
-                alt="profile"
-              />
-              <div className="mb-3">
-                <button className="btn btn-primary btn-sm" type="button">
-                  Change Photo
-                </button>
+              {(() => {
+                const name = userForm.name || userForm.username || 'U'
+                const initials = name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
+                return (
+                  <div
+                    className="rounded-circle mt-4 mb-3 mx-auto d-flex align-items-center justify-content-center"
+                    style={{
+                      width: 120, height: 120,
+                      background: 'linear-gradient(135deg, #575D90 0%, #4a5080 100%)',
+                      color: '#fff', fontSize: 42, fontWeight: 700,
+                      letterSpacing: '-0.02em', userSelect: 'none',
+                      boxShadow: '0 4px 18px rgba(87,93,144,0.25)',
+                    }}
+                    aria-label={`Avatar for ${name}`}
+                  >
+                    {initials}
+                  </div>
+                )
+              })()}
+              <div className="fw-bold text-dark mb-1" style={{ fontSize: '1.05rem' }}>
+                {userForm.name || userForm.username || '—'}
               </div>
+              {userRole && (
+                <span className="badge text-capitalize mb-3"
+                  style={{
+                    background: userRole === 'admin' ? '#fee2e2' : userRole === 'manager' ? '#fef9c3' : '#dcfce7',
+                    color:      userRole === 'admin' ? '#dc2626' : userRole === 'manager' ? '#b45309' : '#16a34a',
+                    borderRadius: 8, padding: '4px 12px', fontSize: '0.78rem',
+                  }}>
+                  {userRole}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -94,7 +106,6 @@ export default function Profile() {
                   <p className="text-primary m-0 fw-bold">User Settings</p>
                 </div>
                 <div className="card-body">
-                  {userMsg && <div className="alert alert-info py-1 small">{userMsg}</div>}
                   <form onSubmit={handleUserSubmit}>
                     <div className="row">
                       <div className="col">
@@ -175,7 +186,6 @@ export default function Profile() {
                   <p className="text-primary m-0 fw-bold">Contact Settings</p>
                 </div>
                 <div className="card-body">
-                  {contactMsg && <div className="alert alert-info py-1 small">{contactMsg}</div>}
                   <form onSubmit={handleContactSubmit}>
                     <div className="mb-3">
                       <label className="form-label" htmlFor="address"><strong>Address</strong></label>
@@ -248,7 +258,6 @@ export default function Profile() {
                   <p className="text-primary m-0 fw-bold">Change Password</p>
                 </div>
                 <div className="card-body">
-                  {pwdMsg.text && <div className={`alert alert-${pwdMsg.type} py-1 small`}>{pwdMsg.text}</div>}
                   <form onSubmit={handlePasswordSubmit}>
                     <div className="mb-3">
                       <label className="form-label"><strong>Current Password</strong></label>

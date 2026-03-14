@@ -21,6 +21,14 @@ const STATUS_BADGE = {
   adjustment: 'bg-warning',
 }
 
+const KPI_META = {
+  primary: { bg: '#EEF0FA', color: '#575D90' },
+  warning: { bg: '#FFFBEB', color: '#D97706' },
+  danger:  { bg: '#FEF2F2', color: '#DC2626' },
+  success: { bg: '#F0FDF4', color: '#16A34A' },
+  info:    { bg: '#ECFEFF', color: '#0E7490' },
+}
+
 export default function Dashboard() {
   const [stats, setStats]       = useState(null)
   const [chartData, setChartData] = useState([])
@@ -62,28 +70,31 @@ export default function Dashboard() {
     scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
   }
 
-  const KpiCard = ({ color, icon, label, value, to }) => (
-    <div className="col-md-6 col-xl mb-4">
-      <div className={`card shadow py-2 border-left-${color}`}>
-        <div className="card-body">
-          <div className="row g-0 align-items-center">
-            <div className="col me-2">
-              <div className={`text-uppercase text-${color} mb-1 fw-bold text-xs`}>{label}</div>
-              <div className="text-dark mb-0 fw-bold h5">{loading ? '…' : value}</div>
+  const KpiCard = ({ color, icon, label, value, to }) => {
+    const meta = KPI_META[color] || KPI_META.primary
+    return (
+      <div className="col-sm-6 col-xl mb-4">
+        <div className="card kpi-card h-100">
+          <div className="card-body d-flex align-items-center gap-3 py-3 px-3">
+            <div className="kpi-icon-wrap" style={{ background: meta.bg, color: meta.color }}>
+              <i className={icon} aria-hidden="true" />
             </div>
-            <div className="col-auto">
-              <i className={`${icon} fa-2x text-gray-300`}></i>
+            <div className="flex-grow-1 min-width-0">
+              <div className="kpi-label" style={{ color: meta.color }}>{label}</div>
+              <div className="kpi-value" style={{ color: '#111827' }}>
+                {loading ? <span style={{ fontSize: '1.1rem', color: '#d1d5db' }}>—</span> : value}
+              </div>
+              {to && (
+                <Link to={to} className="kpi-link" style={{ color: meta.color }}>
+                  View all <i className="fas fa-arrow-right" style={{ fontSize: '0.65rem' }} aria-hidden="true" />
+                </Link>
+              )}
             </div>
           </div>
-          {to && (
-            <Link to={to} className={`small text-${color} mt-1 d-block`}>
-              View all <i className="fas fa-arrow-right fa-xs"></i>
-            </Link>
-          )}
         </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <>

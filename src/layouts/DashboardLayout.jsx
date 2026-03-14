@@ -11,9 +11,9 @@ export default function DashboardLayout() {
       <div className="d-flex flex-column" id="content-wrapper">
         <div id="content">
           <Topbar />
-          <div className="container-fluid">
+          <main id="main-content" className="container-fluid">
             <Outlet />
-          </div>
+          </main>
         </div>
         <Footer />
       </div>

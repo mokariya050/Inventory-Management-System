@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import toast from 'react-hot-toast'
 import { api } from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 
@@ -56,8 +57,7 @@ export default function Users() {
   const { user: me } = useAuth()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [saving, setSaving] = useState(null)   // id of user currently being saved
+  const [saving, setSaving] = useState(null)
   const [search, setSearch] = useState('')
 
   const actorLevel = ROLE_LEVELS[me?.role] || 0
@@ -66,7 +66,7 @@ export default function Users() {
     setLoading(true)
     api.getAdminUsers()
       .then(setUsers)
-      .catch((e) => setError(e.message))
+      .catch((e) => toast.error(e.message))
       .finally(() => setLoading(false))
   }, [])
 
@@ -77,8 +77,9 @@ export default function Users() {
     try {
       const updated = await api.assignUserRole(userId, role)
       setUsers((prev) => prev.map((u) => (u.id === updated.id ? { ...u, role: updated.role } : u)))
+      toast.success(`Role updated to ${updated.role || 'No Role'}.`)
     } catch (e) {
-      setError(e.message)
+      toast.error(e.message)
     } finally {
       setSaving(null)
     }
@@ -89,8 +90,9 @@ export default function Users() {
     try {
       await api.deleteAdminUser(userId)
       setUsers((prev) => prev.filter((u) => u.id !== userId))
+      toast.success(`${userName || 'User'} deleted.`)
     } catch (e) {
-      setError(e.message)
+      toast.error(e.message)
     }
   }
 
@@ -108,13 +110,6 @@ export default function Users() {
   return (
     <>
       <h3 className="text-dark mb-4">User Management</h3>
-
-      {error && (
-        <div className="alert alert-danger alert-dismissible py-2" role="alert">
-          {error}
-          <button type="button" className="btn-close" onClick={() => setError('')} />
-        </div>
-      )}
 
       <div className="card shadow mb-4">
         <div className="card-header py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
