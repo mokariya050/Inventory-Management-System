@@ -1,91 +1,26 @@
--- Inventory Management System Database Schema
--- Run: mysql -u root -p < schema.sql
+-- CoreInventory – Inventory Management System
+-- Full schema (safe to re-run: uses IF NOT EXISTS / INSERT IGNORE)
+-- Run: mysql -u root -p < backend/schema.sql
 
 CREATE DATABASE IF NOT EXISTS inventory_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE inventory_db;
 
--- ─────────────────────────────────────────
--- Tables
--- ─────────────────────────────────────────
+-- ─────────────────────────────────────────────────────────────────
+-- KEEP: Auth & UI tables
+-- ─────────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS users (
-    id           INT AUTO_INCREMENT PRIMARY KEY,
-    username     VARCHAR(80)  NOT NULL UNIQUE,
-    email        VARCHAR(120) NOT NULL UNIQUE,
-    password_hash VARCHAR(256) NOT NULL,
-    name         VARCHAR(120),
-    role         VARCHAR(80),
-    address      VARCHAR(200),
-    city         VARCHAR(80),
-    country      VARCHAR(80),
-    avatar_url   VARCHAR(300) DEFAULT '/assets/img/avatars/avatar1.jpeg',
-    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS employees (
-    id         INT AUTO_INCREMENT PRIMARY KEY,
-    name       VARCHAR(120) NOT NULL,
-    position   VARCHAR(120),
-    office     VARCHAR(80),
-    age        INT,
-    start_date DATE,
-    salary     DECIMAL(12,2),
-    avatar_url VARCHAR(300) DEFAULT '/assets/img/avatars/avatar1.jpeg'
-);
-
-CREATE TABLE IF NOT EXISTS projects (
-    id       INT AUTO_INCREMENT PRIMARY KEY,
-    name     VARCHAR(120) NOT NULL,
-    progress INT DEFAULT 0,
-    color    VARCHAR(30) DEFAULT 'bg-primary'
-);
-
-CREATE TABLE IF NOT EXISTS tasks (
-    id        INT AUTO_INCREMENT PRIMARY KEY,
-    title     VARCHAR(200) NOT NULL,
-    due_time  VARCHAR(20),
-    completed TINYINT(1) DEFAULT 0
-);
-
-CREATE TABLE IF NOT EXISTS dashboard_stats (
-    id                   INT AUTO_INCREMENT PRIMARY KEY,
-    monthly_earnings     DECIMAL(14,2),
-    annual_earnings      DECIMAL(14,2),
-    task_completion_pct  INT,
-    pending_requests     INT
-);
-
-CREATE TABLE IF NOT EXISTS earnings_history (
-    id          INT AUTO_INCREMENT PRIMARY KEY,
-    month_label VARCHAR(10) NOT NULL,
-    amount      DECIMAL(14,2) NOT NULL,
-    year        INT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS revenue_sources (
-    id    INT AUTO_INCREMENT PRIMARY KEY,
-    label VARCHAR(60) NOT NULL,
-    value INT NOT NULL,
-    color VARCHAR(20) DEFAULT '#4e73df'
-);
-
-CREATE TABLE IF NOT EXISTS notifications (
-    id         INT AUTO_INCREMENT PRIMARY KEY,
-    message    TEXT NOT NULL,
-    icon       VARCHAR(60) DEFAULT 'fas fa-file-alt',
-    icon_bg    VARCHAR(30) DEFAULT 'bg-primary',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    is_read    TINYINT(1) DEFAULT 0
-);
-
-CREATE TABLE IF NOT EXISTS messages (
     id            INT AUTO_INCREMENT PRIMARY KEY,
-    sender_name   VARCHAR(120) NOT NULL,
-    sender_avatar VARCHAR(300) DEFAULT '/assets/img/avatars/avatar1.jpeg',
-    preview       TEXT,
-    sent_at       VARCHAR(20),
-    is_read       TINYINT(1) DEFAULT 0,
-    online_status VARCHAR(20) DEFAULT 'offline'
+    username      VARCHAR(80)  NOT NULL UNIQUE,
+    email         VARCHAR(120) NOT NULL UNIQUE,
+    password_hash VARCHAR(256) NOT NULL,
+    name          VARCHAR(120),
+    role          VARCHAR(80),
+    address       VARCHAR(200),
+    city          VARCHAR(80),
+    country       VARCHAR(80),
+    avatar_url    VARCHAR(300) DEFAULT '/assets/img/avatars/avatar1.jpeg',
+    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS otp_tokens (
@@ -98,94 +33,276 @@ CREATE TABLE IF NOT EXISTS otp_tokens (
     created_at DATETIME     DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_email_purpose (email, purpose)
 );
--- Migration note: if DB already exists, run:
---   ALTER TABLE ... or just execute this CREATE TABLE IF NOT EXISTS statement.
 
--- ─────────────────────────────────────────
--- Seed Data
--- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS notifications (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    message    TEXT NOT NULL,
+    icon       VARCHAR(60)  DEFAULT 'fas fa-file-alt',
+    icon_bg    VARCHAR(30)  DEFAULT 'bg-primary',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_read    TINYINT(1)   DEFAULT 0
+);
 
--- Admin user  (password: admin123)
-INSERT INTO users (username, email, password_hash, name, role, address, city, country, avatar_url) VALUES
+CREATE TABLE IF NOT EXISTS messages (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    sender_name   VARCHAR(120) NOT NULL,
+    sender_avatar VARCHAR(300) DEFAULT '/assets/img/avatars/avatar1.jpeg',
+    preview       TEXT,
+    sent_at       VARCHAR(20),
+    is_read       TINYINT(1)   DEFAULT 0,
+    online_status VARCHAR(20)  DEFAULT 'offline'
+);
+
+-- ─────────────────────────────────────────────────────────────────
+-- NEW: Inventory master data
+-- ─────────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS product_categories (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    name       VARCHAR(80) NOT NULL UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS suppliers (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    name          VARCHAR(120) NOT NULL,
+    contact_email VARCHAR(120),
+    phone         VARCHAR(40),
+    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS warehouses (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    name       VARCHAR(120) NOT NULL,
+    short_code VARCHAR(10)  NOT NULL UNIQUE,
+    address    VARCHAR(200),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS locations (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    warehouse_id INT NOT NULL,
+    name         VARCHAR(80) NOT NULL,
+    code         VARCHAR(20) NOT NULL,
+    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_wh_code (warehouse_id, code),
+    CONSTRAINT fk_loc_warehouse FOREIGN KEY (warehouse_id) REFERENCES warehouses(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS products (
+    id               INT AUTO_INCREMENT PRIMARY KEY,
+    sku              VARCHAR(60)  NOT NULL UNIQUE,
+    name             VARCHAR(120) NOT NULL,
+    category_id      INT,
+    unit_of_measure  VARCHAR(30)  DEFAULT 'unit',
+    min_stock        INT          DEFAULT 0,
+    created_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_product_category FOREIGN KEY (category_id) REFERENCES product_categories(id) ON DELETE SET NULL
+);
+
+-- ─────────────────────────────────────────────────────────────────
+-- NEW: Stock accounting
+-- ─────────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS stock_levels (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    product_id  INT NOT NULL,
+    location_id INT NOT NULL,
+    qty         INT NOT NULL DEFAULT 0,
+    UNIQUE KEY uq_product_location (product_id, location_id),
+    CONSTRAINT fk_sl_product  FOREIGN KEY (product_id)  REFERENCES products(id)  ON DELETE CASCADE,
+    CONSTRAINT fk_sl_location FOREIGN KEY (location_id) REFERENCES locations(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS stock_ledger (
+    id               INT AUTO_INCREMENT PRIMARY KEY,
+    product_id       INT NOT NULL,
+    from_location_id INT,
+    to_location_id   INT,
+    qty_change       INT NOT NULL,
+    operation_type   ENUM('receipt','delivery','transfer','adjustment') NOT NULL,
+    reference_id     INT,
+    reference_type   VARCHAR(20),
+    created_by       INT,
+    created_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_ledger_product  FOREIGN KEY (product_id)       REFERENCES products(id)   ON DELETE CASCADE,
+    CONSTRAINT fk_ledger_from     FOREIGN KEY (from_location_id) REFERENCES locations(id)  ON DELETE SET NULL,
+    CONSTRAINT fk_ledger_to       FOREIGN KEY (to_location_id)   REFERENCES locations(id)  ON DELETE SET NULL,
+    CONSTRAINT fk_ledger_user     FOREIGN KEY (created_by)       REFERENCES users(id)      ON DELETE SET NULL
+);
+
+-- ─────────────────────────────────────────────────────────────────
+-- NEW: Operational documents
+-- ─────────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS receipts (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    ref          VARCHAR(40) NOT NULL UNIQUE,
+    supplier_id  INT,
+    location_id  INT NOT NULL,
+    status       ENUM('draft','ready','done','canceled') DEFAULT 'draft',
+    notes        TEXT,
+    created_by   INT,
+    validated_at DATETIME,
+    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_rec_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL,
+    CONSTRAINT fk_rec_location FOREIGN KEY (location_id) REFERENCES locations(id) ON DELETE RESTRICT,
+    CONSTRAINT fk_rec_user     FOREIGN KEY (created_by)  REFERENCES users(id)     ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS receipt_lines (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    receipt_id   INT NOT NULL,
+    product_id   INT NOT NULL,
+    qty_expected INT DEFAULT 0,
+    qty_done     INT DEFAULT 0,
+    CONSTRAINT fk_rl_receipt FOREIGN KEY (receipt_id) REFERENCES receipts(id) ON DELETE CASCADE,
+    CONSTRAINT fk_rl_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS deliveries (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    ref           VARCHAR(40) NOT NULL UNIQUE,
+    customer_name VARCHAR(120),
+    location_id   INT NOT NULL,
+    status        ENUM('draft','ready','done','canceled') DEFAULT 'draft',
+    notes         TEXT,
+    created_by    INT,
+    validated_at  DATETIME,
+    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_del_location FOREIGN KEY (location_id) REFERENCES locations(id) ON DELETE RESTRICT,
+    CONSTRAINT fk_del_user     FOREIGN KEY (created_by)  REFERENCES users(id)     ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS delivery_lines (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    delivery_id  INT NOT NULL,
+    product_id   INT NOT NULL,
+    qty_ordered  INT DEFAULT 0,
+    qty_done     INT DEFAULT 0,
+    CONSTRAINT fk_dl_delivery FOREIGN KEY (delivery_id) REFERENCES deliveries(id) ON DELETE CASCADE,
+    CONSTRAINT fk_dl_product  FOREIGN KEY (product_id)  REFERENCES products(id)  ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS transfers (
+    id               INT AUTO_INCREMENT PRIMARY KEY,
+    ref              VARCHAR(40) NOT NULL UNIQUE,
+    from_location_id INT NOT NULL,
+    to_location_id   INT NOT NULL,
+    status           ENUM('draft','ready','done','canceled') DEFAULT 'draft',
+    notes            TEXT,
+    created_by       INT,
+    validated_at     DATETIME,
+    created_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_tr_from FOREIGN KEY (from_location_id) REFERENCES locations(id) ON DELETE RESTRICT,
+    CONSTRAINT fk_tr_to   FOREIGN KEY (to_location_id)   REFERENCES locations(id) ON DELETE RESTRICT,
+    CONSTRAINT fk_tr_user FOREIGN KEY (created_by)       REFERENCES users(id)     ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS transfer_lines (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    transfer_id INT NOT NULL,
+    product_id  INT NOT NULL,
+    qty         INT DEFAULT 0,
+    CONSTRAINT fk_tl_transfer FOREIGN KEY (transfer_id) REFERENCES transfers(id) ON DELETE CASCADE,
+    CONSTRAINT fk_tl_product  FOREIGN KEY (product_id)  REFERENCES products(id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS adjustments (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    ref          VARCHAR(40) NOT NULL UNIQUE,
+    location_id  INT NOT NULL,
+    status       ENUM('draft','ready','done','canceled') DEFAULT 'draft',
+    notes        TEXT,
+    created_by   INT,
+    validated_at DATETIME,
+    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_adj_location FOREIGN KEY (location_id) REFERENCES locations(id) ON DELETE RESTRICT,
+    CONSTRAINT fk_adj_user     FOREIGN KEY (created_by)  REFERENCES users(id)     ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS adjustment_lines (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    adjustment_id INT NOT NULL,
+    product_id    INT NOT NULL,
+    qty_system    INT DEFAULT 0,
+    qty_counted   INT DEFAULT 0,
+    CONSTRAINT fk_al_adjustment FOREIGN KEY (adjustment_id) REFERENCES adjustments(id) ON DELETE CASCADE,
+    CONSTRAINT fk_al_product    FOREIGN KEY (product_id)    REFERENCES products(id)    ON DELETE RESTRICT
+);
+
+-- ─────────────────────────────────────────────────────────────────
+-- Seed Data  (INSERT IGNORE = safe to re-run)
+-- ─────────────────────────────────────────────────────────────────
+
+-- Admin user (password: admin123)
+INSERT IGNORE INTO users (username, email, password_hash, name, role, address, city, country, avatar_url) VALUES
 ('admin', 'admin@brand.com',
  'scrypt:32768:8:1$thv4DPRWdbnWJGBw$5431048b496e1e06c2250990511082639c8a32bddc9038e9deb0230cf5d11f6285a52ccbe714abd7827760f1bfaef813406fa13f53bd5f82776b56bc701ec6f7',
  'Valerie Luna', 'Administrator', 'Sunset Blvd, 38', 'Los Angeles', 'USA',
  '/assets/img/avatars/avatar1.jpeg');
 
--- Employees
-INSERT INTO employees (name, position, office, age, start_date, salary, avatar_url) VALUES
-('Airi Satou',         'Accountant',                     'Tokyo',         33, '2008-11-28', 162700.00,  '/assets/img/avatars/avatar1.jpeg'),
-('Angelica Ramos',     'Chief Executive Officer (CEO)',   'London',        47, '2009-10-09', 1200000.00, '/assets/img/avatars/avatar2.jpeg'),
-('Ashton Cox',         'Junior Technical Author',         'San Francisco', 66, '2009-01-12', 86000.00,   '/assets/img/avatars/avatar3.jpeg'),
-('Bradley Greer',      'Software Engineer',               'London',        41, '2012-10-13', 132000.00,  '/assets/img/avatars/avatar4.jpeg'),
-('Brenden Wagner',     'Software Engineer',               'San Francisco', 28, '2011-06-07', 206850.00,  '/assets/img/avatars/avatar5.jpeg'),
-('Brielle Williamson', 'Integration Specialist',          'New York',      61, '2012-12-02', 372000.00,  '/assets/img/avatars/avatar1.jpeg'),
-('Bruno Nash',         'Software Engineer',               'London',        38, '2011-05-03', 163500.00,  '/assets/img/avatars/avatar2.jpeg'),
-('Caesar Vance',       'Pre-Sales Support',               'New York',      21, '2011-12-12', 106450.00,  '/assets/img/avatars/avatar3.jpeg'),
-('Cara Stevens',       'Sales Assistant',                 'New York',      46, '2011-12-06', 145600.00,  '/assets/img/avatars/avatar4.jpeg'),
-('Cedric Kelly',       'Senior JavaScript Developer',     'Edinburgh',     22, '2012-03-29', 433060.00,  '/assets/img/avatars/avatar5.jpeg'),
-('Charde Marshall',    'Regional Director',               'San Francisco', 36, '2008-10-16', 470600.00,  '/assets/img/avatars/avatar1.jpeg'),
-('Colleen Hurst',      'Javascript Developer',            'San Francisco', 39, '2009-09-15', 205500.00,  '/assets/img/avatars/avatar2.jpeg'),
-('Dai Rios',           'Personnel Lead',                  'Edinburgh',     35, '2012-09-26', 217500.00,  '/assets/img/avatars/avatar3.jpeg'),
-('Donna Snider',       'Customer Support',                'New York',      27, '2011-01-25', 112000.00,  '/assets/img/avatars/avatar4.jpeg'),
-('Doris Wilder',       'Sales Assistant',                 'Sidney',        23, '2010-09-20', 85600.00,   '/assets/img/avatars/avatar5.jpeg'),
-('Finn Camacho',       'Support Engineer',                'San Francisco', 47, '2009-07-07', 342000.00,  '/assets/img/avatars/avatar1.jpeg'),
-('Fiona Green',        'Chief Operating Officer (COO)',   'San Francisco', 48, '2010-03-11', 850000.00,  '/assets/img/avatars/avatar2.jpeg'),
-('Garrett Winters',    'Accountant',                      'Tokyo',         63, '2011-07-25', 170750.00,  '/assets/img/avatars/avatar3.jpeg'),
-('Gavin Cortez',       'Team Leader',                     'San Francisco', 22, '2008-10-26', 235500.00,  '/assets/img/avatars/avatar4.jpeg'),
-('Gavin Joyce',        'Developer',                       'Edinburgh',     42, '2010-12-22', 92575.00,   '/assets/img/avatars/avatar5.jpeg'),
-('Geneva Baldwin',     'Software Engineeneer',            'San Francisco', 42, '2010-01-28', 138575.00,  '/assets/img/avatars/avatar1.jpeg'),
-('Hermione Butler',    'Regional Director',               'London',        47, '2011-03-21', 356250.00,  '/assets/img/avatars/avatar2.jpeg'),
-('Herrod Chandler',    'Sales Assistant',                 'San Francisco', 59, '2012-08-06', 137500.00,  '/assets/img/avatars/avatar3.jpeg'),
-('Hope Fuentes',       'Secretary',                       'San Francisco', 41, '2010-02-12', 109850.00,  '/assets/img/avatars/avatar4.jpeg'),
-('Howard Hatfield',    'Office Manager',                  'San Francisco', 51, '2008-12-16', 164500.00,  '/assets/img/avatars/avatar5.jpeg'),
-('Jackson Bradshaw',   'Director',                        'New York',      65, '2008-09-26', 645750.00,  '/assets/img/avatars/avatar1.jpeg'),
-('Jena Gaines',        'Office Manager',                  'London',        30, '2008-12-19', 90560.00,   '/assets/img/avatars/avatar2.jpeg');
-
--- Projects
-INSERT INTO projects (name, progress, color) VALUES
-('Server migration',  20,  'bg-danger'),
-('Sales tracking',    40,  'bg-warning'),
-('Customer Database', 60,  'bg-primary'),
-('Payout Details',    80,  'bg-info'),
-('Account setup',     100, 'bg-success');
-
--- Tasks
-INSERT INTO tasks (title, due_time, completed) VALUES
-('Lunch meeting', '10:30 AM', 0),
-('Lunch meeting', '11:30 AM', 0),
-('Lunch meeting', '12:30 AM', 0);
-
--- Dashboard stats
-INSERT INTO dashboard_stats (monthly_earnings, annual_earnings, task_completion_pct, pending_requests) VALUES
-(40000.00, 215000.00, 50, 18);
-
--- Earnings history
-INSERT INTO earnings_history (month_label, amount, year) VALUES
-('Jan', 0,     2025),
-('Feb', 10000, 2025),
-('Mar', 5000,  2025),
-('Apr', 15000, 2025),
-('May', 10000, 2025),
-('Jun', 20000, 2025),
-('Jul', 15000, 2025),
-('Aug', 25000, 2025);
-
--- Revenue sources
-INSERT INTO revenue_sources (label, value, color) VALUES
-('Direct',   50, '#4e73df'),
-('Social',   30, '#1cc88a'),
-('Referral', 15, '#36b9cc');
-
 -- Notifications
-INSERT INTO notifications (message, icon, icon_bg, created_at) VALUES
-('A new monthly report is ready to download!',                           'fas fa-file-alt',          'bg-primary', '2019-12-12 09:00:00'),
-('$290.29 has been deposited into your account!',                        'fas fa-donate',            'bg-success', '2019-12-07 14:30:00'),
-('Spending Alert: We''ve noticed unusually high spending for your account.', 'fas fa-exclamation-triangle', 'bg-warning', '2019-12-02 11:15:00');
+INSERT IGNORE INTO notifications (id, message, icon, icon_bg, created_at) VALUES
+(1, 'Stock alert: Wireless Keyboard is running low!',         'fas fa-exclamation-triangle', 'bg-warning', NOW()),
+(2, 'Receipt REC-SEED-0001 has been validated successfully.', 'fas fa-check-circle',          'bg-success', NOW()),
+(3, 'New delivery order created for Customer ABC.',           'fas fa-truck',                 'bg-primary', NOW());
 
 -- Messages
-INSERT INTO messages (sender_name, sender_avatar, preview, sent_at, online_status) VALUES
-('Emily Fowler',   '/assets/img/avatars/avatar4.jpeg', 'Hi there! I am wondering if you can help me with a problem I''ve been having.', '58m', 'online'),
-('Jae Chun',       '/assets/img/avatars/avatar2.jpeg', 'I have the photos that you ordered last month!',                                   '1d',  'offline'),
-('Morgan Alvarez', '/assets/img/avatars/avatar3.jpeg', 'Last month''s report looks great, I am very happy with the progress so far, keep up the good work!', '2d', 'away'),
-('Chicken the Dog','/assets/img/avatars/avatar5.jpeg', 'Am I a good boy? The reason I ask is because someone told me that people say this to all dogs, even if they aren''t good...', '2w', 'online');
+INSERT IGNORE INTO messages (id, sender_name, sender_avatar, preview, sent_at, online_status) VALUES
+(1, 'Emily Fowler',    '/assets/img/avatars/avatar4.jpeg', 'Hi there! Can you help me with a stock inquiry?',                        '58m', 'online'),
+(2, 'Jae Chun',        '/assets/img/avatars/avatar2.jpeg', 'The receipt for last month''s order is ready to validate.',              '1d',  'offline'),
+(3, 'Morgan Alvarez',  '/assets/img/avatars/avatar3.jpeg', 'Inventory report looks great, keep up the good work!',                   '2d',  'away'),
+(4, 'Chicken the Dog', '/assets/img/avatars/avatar5.jpeg', 'Am I a good warehouse manager? People keep saying yes to all managers.', '2w',  'online');
+
+-- Warehouses
+INSERT IGNORE INTO warehouses (id, name, short_code, address) VALUES
+(1, 'Main Warehouse',      'MAIN', '100 Industrial Ave, Los Angeles, CA'),
+(2, 'Secondary Warehouse', 'SEC',  '200 Storage Blvd, Los Angeles, CA');
+
+-- Locations (2 per warehouse)
+INSERT IGNORE INTO locations (id, warehouse_id, name, code) VALUES
+(1, 1, 'Main Shelf',      'MAIN-A'),
+(2, 1, 'Receiving Dock',  'MAIN-RECV'),
+(3, 2, 'Secondary Shelf', 'SEC-B'),
+(4, 2, 'Overflow Zone',   'SEC-OVF');
+
+-- Product categories
+INSERT IGNORE INTO product_categories (id, name) VALUES
+(1, 'Electronics'),
+(2, 'Furniture'),
+(3, 'Stationery'),
+(4, 'Apparel');
+
+-- Suppliers
+INSERT IGNORE INTO suppliers (id, name, contact_email, phone) VALUES
+(1, 'TechSupply Co',  'orders@techsupply.com',  '+1-800-555-0101'),
+(2, 'OfficePro Ltd',  'sales@officepro.com',    '+1-800-555-0202'),
+(3, 'Fashion World',  'supply@fashionworld.com', '+1-800-555-0303');
+
+-- Products
+INSERT IGNORE INTO products (id, sku, name, category_id, unit_of_measure, min_stock) VALUES
+(1,  'ELEC-001', 'Laptop Pro 15"',         1, 'unit', 5),
+(2,  'ELEC-002', 'Wireless Keyboard',      1, 'unit', 10),
+(3,  'ELEC-003', 'USB-C Hub',              1, 'unit', 15),
+(4,  'FURN-001', 'Office Chair',           2, 'unit', 3),
+(5,  'FURN-002', 'Standing Desk',          2, 'unit', 2),
+(6,  'STAT-001', 'Ballpoint Pens (box)',   3, 'box',  20),
+(7,  'STAT-002', 'A4 Paper Ream',          3, 'ream', 50),
+(8,  'STAT-003', 'Sticky Notes Pack',      3, 'pack', 30),
+(9,  'APRL-001', 'Company T-Shirt (M)',    4, 'unit', 25),
+(10, 'APRL-002', 'Safety Vest',            4, 'unit', 10);
+
+-- Initial stock levels (direct seed — no ledger entries for seed data)
+-- 1=MAIN-A, 2=MAIN-RECV, 3=SEC-B, 4=SEC-OVF
+INSERT IGNORE INTO stock_levels (product_id, location_id, qty) VALUES
+(1,  1, 8),   -- Laptop Pro 15"       : 8  (OK, min=5)
+(2,  1, 6),   -- Wireless Keyboard    : 6  (LOW, min=10)
+              -- USB-C Hub            : 0  (OUT OF STOCK, min=15)
+(4,  1, 5),   -- Office Chair         : 5  (OK, min=3)
+(5,  1, 3),   -- Standing Desk        : 3  (OK, min=2)
+(6,  1, 45),  -- Ballpoint Pens       : 45 (OK, min=20)
+(7,  1, 80),  -- A4 Paper Ream        : 80 (OK, min=50)
+(8,  1, 12),  -- Sticky Notes Pack    : 12 (LOW, min=30)
+(9,  1, 30),  -- Company T-Shirt (M)  : 30 (OK, min=25)
+(10, 3, 3);   -- Safety Vest          : 3  (LOW, min=10)
